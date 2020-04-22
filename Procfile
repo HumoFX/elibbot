@@ -1,1 +1,1 @@
-bot: java -jar out/elibbot.jar
+bot: java -jar target/e-lib-bot-2.2-jar-with-dependencies.jar
