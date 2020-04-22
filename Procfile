@@ -1,0 +1,1 @@
+worker: java -jar /out/artifacts/elibbot_jar/elibbot.jar
