@@ -6,10 +6,6 @@ import org.telegram.telegrambots.meta.exceptions.TelegramApiException
 
 
 fun main(args: Array<String>) {
-//    System.getProperties()["proxySet"] = "true";
-//    System.getProperties()["socksProxyHost"] = "127.0.0.1";
-//    System.getProperties()["socksProxyPort"] = "9150";
-
 
     ApiContextInitializer.init()
     try {

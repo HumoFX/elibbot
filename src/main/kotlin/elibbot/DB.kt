@@ -5,6 +5,12 @@ import java.sql.DriverManager
 import java.sql.Statement
 import kotlin.system.exitProcess
 
+//const val connect = "jdbc:postgres://seallheo:zc2-JGbg8Q9LClrrCkFcKxJ9rS8UDXGY@drona.db.elephantsql.com:5432/seallheo"
+const val connect = "jdbc:postgresql://drona.db.elephantsql.com:5432/seallheo"
+//const val user = "postgres"
+const val user = "seallheo"
+//const val pass = "123"
+const val pass = "zc2-JGbg8Q9LClrrCkFcKxJ9rS8UDXGY"
 open class DB {
     open fun CREATE() {
         var c: Connection? = null
@@ -12,7 +18,7 @@ open class DB {
         try {
             Class.forName("org.postgresql.Driver")
             c = DriverManager
-                .getConnection("jdbc:postgresql://localhost:5432/postgres", "postgres", "123")
+                .getConnection(connect, user, pass)
             println("Database opened successfully")
             stmt = c!!.createStatement()
             val sql = "CREATE TABLE BOOKS" +
@@ -48,7 +54,7 @@ open class DB {
         try {
             Class.forName("org.postgresql.Driver")
             c = DriverManager
-                .getConnection("jdbc:postgresql://localhost:5432/postgres", "postgres", "123")
+                .getConnection(connect, user, pass)
             c!!.autoCommit = false
 
 
@@ -73,7 +79,7 @@ open class DB {
         try {
             Class.forName("org.postgresql.Driver")
             c = DriverManager
-                .getConnection("jdbc:postgresql://localhost:5432/postgres", "postgres", "123")
+                .getConnection(connect, user, pass)
             c!!.autoCommit = false
 
 
@@ -97,7 +103,7 @@ open class DB {
         try {
             Class.forName("org.postgresql.Driver")
             c = DriverManager
-                .getConnection("jdbc:postgresql://localhost:5432/postgres", "postgres", "123")
+                .getConnection(connect, user, pass)
             c!!.autoCommit = false
 
 
@@ -132,7 +138,7 @@ open class DB {
         try {
             Class.forName("org.postgresql.Driver")
             c = DriverManager
-                .getConnection("jdbc:postgresql://localhost:5432/postgres", "postgres", "123")
+                .getConnection(connect, user, pass)
             c!!.autoCommit = false
 
 
@@ -169,7 +175,7 @@ open class DB {
         try {
             Class.forName("org.postgresql.Driver")
             c = DriverManager
-                .getConnection("jdbc:postgresql://localhost:5432/postgres", "postgres", "123")
+                .getConnection(connect, user, pass)
             c!!.autoCommit = false
 
             stmt = c.createStatement()
@@ -209,7 +215,7 @@ open class DB {
         try {
             Class.forName("org.postgresql.Driver")
             c = DriverManager
-                .getConnection("jdbc:postgresql://localhost:5432/postgres", "postgres", "123")
+                .getConnection(connect, user, pass)
             c!!.autoCommit = false
 
 
@@ -252,7 +258,7 @@ open class DB {
         try {
             Class.forName("org.postgresql.Driver")
             c = DriverManager
-                .getConnection("jdbc:postgresql://localhost:5432/postgres", "postgres", "123")
+                .getConnection(connect, user, pass)
             c!!.autoCommit = false
 
             stmt = c.createStatement()
@@ -292,7 +298,7 @@ open class DB {
         try {
             Class.forName("org.postgresql.Driver")
             c = DriverManager
-                .getConnection("jdbc:postgresql://localhost:5432/postgres", "postgres", "123")
+                .getConnection(connect, user, pass)
             c!!.autoCommit = false
 
 
@@ -345,7 +351,7 @@ open class DB {
         try {
             Class.forName("org.postgresql.Driver")
             c = DriverManager
-                .getConnection("jdbc:postgresql://localhost:5432/postgres", "postgres", "123")
+                .getConnection(connect, user, pass)
             c!!.autoCommit = false
 
             stmt = c.createStatement()
@@ -385,7 +391,7 @@ open class DB {
         try {
             Class.forName("org.postgresql.Driver")
             c = DriverManager
-                .getConnection("jdbc:postgresql://localhost:5432/postgres", "postgres", "123")
+                .getConnection(connect, user, pass)
             c!!.autoCommit = false
 
 
@@ -432,7 +438,7 @@ open class DB {
         try {
             Class.forName("org.postgresql.Driver")
             c = DriverManager
-                .getConnection("jdbc:postgresql://localhost:5432/postgres", "postgres", "123")
+                .getConnection(connect, user, pass)
             c!!.autoCommit = false
 
             stmt = c.createStatement()
@@ -460,7 +466,7 @@ open class DB {
         try {
             Class.forName("org.postgresql.Driver")
             c = DriverManager
-                .getConnection("jdbc:postgresql://localhost:5432/postgres", "postgres", "123")
+                .getConnection(connect, user, pass)
             c!!.autoCommit = false
             println("Opened database successfully")
 
@@ -484,7 +490,7 @@ open class DB {
         try {
             Class.forName("org.postgresql.Driver")
             c = DriverManager
-                .getConnection("jdbc:postgresql://localhost:5432/postgres", "postgres", "123")
+                .getConnection(connect, user, pass)
             c!!.autoCommit = false
             println("Opened database successfully")
 
@@ -508,7 +514,7 @@ open class DB {
         try {
             Class.forName("org.postgresql.Driver")
             c = DriverManager
-                .getConnection("jdbc:postgresql://localhost:5432/postgres", "postgres", "123")
+                .getConnection(connect, user, pass)
             c!!.autoCommit = false
             println("Opened database successfully")
 
@@ -533,7 +539,7 @@ open class DB {
         try {
             Class.forName("org.postgresql.Driver")
             c = DriverManager
-                .getConnection("jdbc:postgresql://localhost:5432/postgres", "postgres", "123")
+                .getConnection(connect, user, pass)
             c!!.autoCommit = false
             println("Opened database successfully")
 
@@ -556,7 +562,7 @@ open class DB {
         try {
             Class.forName("org.postgresql.Driver")
             c = DriverManager
-                .getConnection("jdbc:postgresql://localhost:5432/postgres", "postgres", "123")
+                .getConnection(connect, user, pass)
             c!!.autoCommit = false
             println("Opened database successfully")
 
@@ -579,7 +585,7 @@ open class DB {
         try {
             Class.forName("org.postgresql.Driver")
             c = DriverManager
-                .getConnection("jdbc:postgresql://localhost:5432/postgres", "postgres", "123")
+                .getConnection(connect, user, pass)
             c!!.autoCommit = false
             println("Opened database successfully")
 

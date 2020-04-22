@@ -1,11 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="DataSourceManagerImpl" format="xml" multifile-model="true">
-    <data-source source="LOCAL" name="Humo@localhost" uuid="cac967d5-21d0-4be5-acdc-195b8bda9088">
+    <data-source source="LOCAL" name="PostgreSQL - postgres://seallheo:zc2-JGbg8Q9LClrrCkFcKxJ9rS8UDXGY@drona.db.elephantsql.com:5432/seallheo" uuid="cac967d5-21d0-4be5-acdc-195b8bda9088">
       <driver-ref>postgresql</driver-ref>
       <synchronize>true</synchronize>
+      <schema-control>MANUAL</schema-control>
       <jdbc-driver>org.postgresql.Driver</jdbc-driver>
-      <jdbc-url>jdbc:postgresql://localhost:5432/Humo</jdbc-url>
+      <jdbc-url>jdbc:postgresql://seallheo:zc2-JGbg8Q9LClrrCkFcKxJ9rS8UDXGY@drona.db.elephantsql.com:5432/seallheo:5432//seallheo:zc2-JGbg8Q9LClrrCkFcKxJ9rS8UDXGY@drona.db.elephantsql.com:5432/seallheo</jdbc-url>
     </data-source>
   </component>
 </project>
