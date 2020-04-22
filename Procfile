@@ -1,1 +1,1 @@
-worker: java -jar /out/artifacts/elibbot_jar/elibbot.jar
+worker: java -jar elibbot/out/artifacts/elibbot_jar/elibbot.jar
