@@ -96,7 +96,7 @@ open class DB {
         }
     }
 
-    open fun write_book(file_id:String,name:String,category_id:Int,photo_id:String)
+    open fun write_book(id:Int,file_id:String,name:String,category_id:Int,photo_id:String)
     {
         var c: Connection? = null
         var stmt: Statement? = null
@@ -108,7 +108,7 @@ open class DB {
 
 
             stmt = c.createStatement()
-            var sql: String = "INSERT INTO BOOKS (FILE_ID,NAME,CATEGORY_ID,PHOTO_ID ) VALUES ('$file_id','$name',$category_id,'$photo_id');"
+            var sql: String = "INSERT INTO BOOKS (ID,FILE_ID,NAME,CATEGORY_ID,PHOTO_ID ) VALUES ('$file_id','$name',$category_id,'$photo_id');"
             stmt.executeUpdate(sql)
 
             stmt.close()

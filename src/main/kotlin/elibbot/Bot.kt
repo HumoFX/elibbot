@@ -811,6 +811,8 @@ class Bot : TelegramLongPollingBot()
                     if (photo != null) {
                         book_info!![2] = photo
                     }
+                    var elem = book_file.keys.last().toInt()
+                    elem += 1
                     if (id != null) {
                         if (book_info != null) {
                            // println("information ${book_info}")
@@ -819,10 +821,8 @@ class Bot : TelegramLongPollingBot()
                             books_name.add(book_info[0])
                             books_id.add(id)
                         }
-                        db.write_book(id, book_info!![0], book_info[1].toInt(), book_info[2])
+                        db.write_book(elem,id, book_info!![0], book_info[1].toInt(), book_info[2])
                     }
-                    var elem = book_file.keys.last().toInt()
-                    elem += 1
 
                     var message = SendMessage()
                         .setChatId(user_id)
