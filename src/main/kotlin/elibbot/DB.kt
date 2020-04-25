@@ -108,7 +108,7 @@ open class DB {
 
 
             stmt = c.createStatement()
-            var sql: String = "INSERT INTO BOOKS (ID,FILE_ID,NAME,CATEGORY_ID,PHOTO_ID ) VALUES ('$file_id','$name',$category_id,'$photo_id');"
+            var sql: String = "INSERT INTO BOOKS (ID,FILE_ID,NAME,CATEGORY_ID,PHOTO_ID ) VALUES ('$id','$file_id','$name',$category_id,'$photo_id');"
             stmt.executeUpdate(sql)
 
             stmt.close()
