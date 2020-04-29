@@ -69,7 +69,7 @@ open class DB {
         }
 
     }
-    open fun write_lesson(univer:Int, name: String,text: String) {
+    open fun write_lesson( univer:Int, name: String,text: String) {
         var c: Connection? = null
         var stmt: Statement? = null
         try {

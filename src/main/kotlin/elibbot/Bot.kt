@@ -31,6 +31,7 @@ class Bot : TelegramLongPollingBot()
         private var file = Txt()
         private val db = DB()
         private var users = mutableMapOf<Long,ArrayList<String>>()
+        private var univer_lesson = mutableMapOf<Int,ArrayList<Int>>()
         private var admin_univer_id = mutableMapOf<Long,Int>()
         private var universities = arrayListOf<String>()
         private var univerlist = mutableMapOf<Int,String>()
@@ -335,6 +336,7 @@ class Bot : TelegramLongPollingBot()
                        {
                            var array = lessons.get(chat_id)!!.toMutableList()
                            array.add(message)
+                           val univer = users.get(chat_id)
                            admin_univer_id.get(chat_id)?.let { db.write_lesson(it,array.get(0),message) ; println("OK") }
                            maintenance(chat_id)
                        }
@@ -368,14 +370,17 @@ class Bot : TelegramLongPollingBot()
                        if (pos == 23)
                        {
                            if(message != "Готово") {
-                               val univer = users.get(chat_id)
-                               if (db.read_lesson(univer!![3])[message.toInt()-1][1].isNotEmpty()) {
-                                  var text = "*** Расписание группы - ${db.read_lesson(univer[3])[message.toInt()-1][1]} \n ***"
-                                   text += db.read_lesson(univer[3])[message.toInt()-1][2]
-                                   sendMessage(chat_id,text)
-                                   maintenance(chat_id)
-                               } else {
-                                   sendMessage(chat_id, "``` Неверный номер.Введите заново!```")
+                               val univer = users[chat_id]!![3]
+                               var lesson = univer_lesson[univer.toInt()]
+                               if (lesson != null) {
+                                   if (lesson.contains(message.toInt()-1)) {
+                                       var text = "*** Расписание группы - ${db.read_lesson(univer)[message.toInt()-1][1]} \n ***"
+                                       text += db.read_lesson(univer)[message.toInt()-1][2]
+                                       sendMessage(chat_id,text)
+                                       maintenance(chat_id)
+                                   } else {
+                                       sendMessage(chat_id, "``` Неверный номер.Введите заново!```")
+                                   }
                                }
                            }
                            buttongroup2(chat_id, message)
@@ -1022,7 +1027,11 @@ class Bot : TelegramLongPollingBot()
             }
         }
         private fun getid(message: String): String {
-            val get_book_id = message.substring(7)
+            var get_book_id = message.substring(7)
+            if(book_file.containsKey(get_book_id))
+            {
+                get_book_id = book_file[get_book_id].toString()
+            }
             return get_book_id
         }
         private fun parser(user_id: Long,message: String): String {
@@ -1329,11 +1338,14 @@ class Bot : TelegramLongPollingBot()
                     val univer = users.get(user_id)
                     var text = "*** Номер гр. -\tНазвание гр. \n***"
                     var i=0
+                    var array = ArrayList<Int>()
                     while (i < db.read_lesson(univer!![3])[0][3].toInt() )
                     {
+                        array.add(i+1)
                         text += "`\t\t\t\t\t\t\t${i+1} - ${db.read_lesson(univer[3])[i][1]}` \n"
                         i++
                     }
+                    univer_lesson.put(univer[3].toInt(),array)
                     val text2 = "__Введите номер группы!__"
                     sendMessage(user_id,text)
                     sendMessage(user_id,text2 )
