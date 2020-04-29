@@ -48,7 +48,7 @@ class Bot : TelegramLongPollingBot()
         private var inited = false
         private var registr = mutableMapOf<Long,ArrayList<String>>()
         private var admins = mutableMapOf<Long, Int>()
-        private var archived = mutableMapOf<Long,List<String>>()
+        private var archived = mutableMapOf<Long,ArrayList<String>>()
         private var posting_photo = mutableMapOf<Long,String>()
         private var UniverRole = mutableMapOf<String,Int>()
         override fun getBotToken(): String {
@@ -432,15 +432,15 @@ class Bot : TelegramLongPollingBot()
                            deleteMessage(user_id, message_id)
                            deleteMessage(user_id, message_id - 1)
                            if (!archived.containsKey(user_id)) {
-                               var array = arrayListOf<String>()
-                               array.plus(fileid)
+                               var array = ArrayList<String>()
+                               array.add(fileid)
                                archived.put(user_id, array)
                                db.update_archive(user_id, fileid)
 
                            } else {
-                               var array = archived.get(user_id)
+                               var array = archived[user_id]
                                if (!array!!.contains(fileid)) {
-                                   array.plus(fileid)
+                                   array.add(fileid)
                                    archived.replace(user_id, array)
                                    var info = users[user_id]!![8]
                                    info = "$info,$fileid"
