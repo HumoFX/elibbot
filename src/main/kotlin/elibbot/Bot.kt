@@ -61,7 +61,6 @@ class Bot : TelegramLongPollingBot()
         {
             if(!(this.inited))
             {
-                db.CREATE()
                 UniverRole.put("Студент",1)
                 UniverRole.put("Преподователь",2)
                 UniverRole.put("Администрация",3)
@@ -1334,7 +1333,6 @@ class Bot : TelegramLongPollingBot()
                     {
                         text += "`\t\t\t\t\t\t\t$i - ${db.read_lesson(univer[3])[i][1]}` \n"
                         i++
-                        println(text)
                     }
                     val text2 = "__Введите номер группы!__"
                     sendMessage(user_id,text)
