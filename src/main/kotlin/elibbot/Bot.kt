@@ -977,7 +977,7 @@ class Bot : TelegramLongPollingBot()
             val rowInline = ArrayList<InlineKeyboardButton>()
             rowInline.add(InlineKeyboardButton().setText(button).setCallbackData("archive=$file_id"))
             rowsInline.add(rowInline)
-            if(!book_file.contains(file_id))
+            if (!book_file.contains(file_id))
             {
                 val answer = SendDocument()
                     .setChatId(user_id)
@@ -1027,11 +1027,7 @@ class Bot : TelegramLongPollingBot()
             }
         }
         private fun getid(message: String): String {
-            var get_book_id = message.substring(7)
-            if(book_file.containsKey(get_book_id))
-            {
-                get_book_id = book_file[get_book_id].toString()
-            }
+            val get_book_id = message.substring(7)
             return get_book_id
         }
         private fun parser(user_id: Long,message: String): String {
@@ -1287,7 +1283,7 @@ class Bot : TelegramLongPollingBot()
                             {
                                 val file = book_file[i]
                                 println("i = $i")
-                                text = " $text [${books[file]!![0]}](t.me/Qrbookbot?start=$i)\n"
+                                text = " $text [${books[file]!![1]}](t.me/Qrbookbot?start=$i)\n"
                             }
                             else
                             {
