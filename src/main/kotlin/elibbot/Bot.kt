@@ -1329,7 +1329,7 @@ class Bot : TelegramLongPollingBot()
                     val univer = users.get(user_id)
                     var text = "*** Номер гр. -\tНазвание гр. \n***"
                     var i=0
-                    while (i <= db.read_lesson(univer!![3])[0][3].toInt() )
+                    while (i < db.read_lesson(univer!![3])[0][3].toInt() )
                     {
                         text += "`\t\t\t\t\t\t\t${i+1} - ${db.read_lesson(univer[3])[i][1]}` \n"
                         i++
