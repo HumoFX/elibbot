@@ -369,9 +369,9 @@ class Bot : TelegramLongPollingBot()
                        {
                            if(message != "Готово") {
                                val univer = users.get(chat_id)
-                               if (db.read_lesson(univer!![3])[message.toInt()][1].isNotEmpty()) {
-                                  var text = "*** Расписание группы - ${db.read_lesson(univer[3])[message.toInt()][1]} \n ***"
-                                   text += db.read_lesson(univer[3])[message.toInt()][2]
+                               if (db.read_lesson(univer!![3])[message.toInt()-1][1].isNotEmpty()) {
+                                  var text = "*** Расписание группы - ${db.read_lesson(univer[3])[message.toInt()-1][1]} \n ***"
+                                   text += db.read_lesson(univer[3])[message.toInt()-1][2]
                                    sendMessage(chat_id,text)
                                    maintenance(chat_id)
                                } else {
