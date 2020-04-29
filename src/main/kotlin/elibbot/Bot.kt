@@ -1283,7 +1283,7 @@ class Bot : TelegramLongPollingBot()
                             {
                                 val file = book_file[i]
                                 println("i = $i")
-                                text = " $text [${books[file]!![1]}](t.me/Qrbookbot?start=$i)\n"
+                                text = " $text [${books[file]!![0]}](t.me/Qrbookbot?start=$i)\n"
                             }
                             else
                             {
