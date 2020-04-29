@@ -6,7 +6,7 @@
       <synchronize>true</synchronize>
       <schema-control>MANUAL</schema-control>
       <jdbc-driver>org.postgresql.Driver</jdbc-driver>
-      <jdbc-url>jdbc:postgresql://seallheo:zc2-JGbg8Q9LClrrCkFcKxJ9rS8UDXGY@drona.db.elephantsql.com:5432/seallheo:5432//seallheo:zc2-JGbg8Q9LClrrCkFcKxJ9rS8UDXGY@drona.db.elephantsql.com:5432/seallheo</jdbc-url>
+      <jdbc-url>jdbc:postgresql://localhost:5432/postgres</jdbc-url>
     </data-source>
   </component>
 </project>

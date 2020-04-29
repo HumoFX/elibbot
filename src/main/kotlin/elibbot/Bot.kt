@@ -39,6 +39,7 @@ class Bot : TelegramLongPollingBot()
         private var books = mutableMapOf<String,ArrayList<String>>()
         private var books_id = arrayListOf<String>()
         private var books_name = arrayListOf<String>()
+        private var lessons = mutableMapOf<Long,ArrayList<String>>()
         private var book_id = mutableMapOf<Long,String>()
         private var book_file = mutableMapOf<String,String>()
         private var admin_add_book = mutableMapOf<Long,String>()
@@ -60,6 +61,7 @@ class Bot : TelegramLongPollingBot()
         {
             if(!(this.inited))
             {
+                db.CREATE()
                 UniverRole.put("Студент",1)
                 UniverRole.put("Преподователь",2)
                 UniverRole.put("Администрация",3)
@@ -160,6 +162,7 @@ class Bot : TelegramLongPollingBot()
                    val chat_id = update.message.chatId
                    val message = update.message.text
                    val message_id = update.message.messageId
+
                    var user_username:String = try{
                        update.message.from.userName
                    }catch(e :IllegalStateException ){
@@ -199,12 +202,12 @@ class Bot : TelegramLongPollingBot()
                            users_pos.replace(chat_id,11)
                            db.update_position(chat_id,11)
                        }
+
                         //add_book(chat_id,photo)
                    }
 
                    if (update.message.hasText() )
                    {
-
 
                        if(update.message.text.startsWith("/start"))
                        {
@@ -329,6 +332,58 @@ class Bot : TelegramLongPollingBot()
                            }
                            buttongroup2(chat_id, message)
                        }
+                       if (pos == 22)
+                       {
+                           var array = lessons.get(chat_id)!!.toMutableList()
+                           array.add(message)
+                           admin_univer_id.get(chat_id)?.let { db.write_lesson(it,array.get(0),message) ; println("OK") }
+                           maintenance(chat_id)
+                       }
+                       if(pos == 21)
+                       {
+                           println("ABBA")
+                           var array = arrayListOf<String>()
+                           array.add(message)
+                           println(array.get(0))
+                           lessons.put(chat_id,array)
+                           sendMessage(chat_id,"Enter Text")
+                           users_pos.replace(chat_id,22)
+                           db.update_position(chat_id, 22)
+
+                       }
+                       if(pos == 20)
+                       {
+                           if(message != "Готово") {
+                               if (univerlist.containsKey(message.toInt())) {
+                                   admin_univer_id.put(chat_id, message.toInt())
+                                   users_pos.replace(chat_id, 21)
+                                   db.update_position(chat_id, 21)
+                                   sendMessage(chat_id, "``` SEND GROUPNAME```")
+                               } else {
+                                   sendMessage(chat_id, "``` Incorrect ID!Enter Again```")
+                               }
+                           }
+                           buttongroup2(chat_id, message)
+
+                       }
+                       if (pos == 23)
+                       {
+                           if(message != "Готово") {
+                               val univer = users.get(chat_id)
+                               if (db.read_lesson(univer!![3])[0][1].contains(message)) {
+                                  var text = "*** Расписание группы - ${db.read_lesson(univer[3])[message.toInt()][1]} \n ***"
+                                   text += db.read_lesson(univer[3])[message.toInt()][2]
+                                   sendMessage(chat_id,text)
+                                   maintenance(chat_id)
+                               } else {
+                                   sendMessage(chat_id, "``` Неверный номер.Введите заново!```")
+                               }
+                           }
+                           buttongroup2(chat_id, message)
+
+                       }
+
+
                        if(book_id.containsKey(chat_id)) {
                            if (users.containsKey(chat_id) && (users[chat_id]!![3].toInt() != 0)) {
                                val text = "Пожалуйста подождите . . . "
@@ -633,6 +688,8 @@ class Bot : TelegramLongPollingBot()
             var button_text8 = "Univer Stats"
             var button_text9 = "Поиск"
             var button_text10 = "Reload"
+            var button_text11 = "Add Lesson"
+            val button_text12 = "Онлайн Уроки"
             val replyKeyboardMarkup = ReplyKeyboardMarkup()
             val message = SendMessage()
                 .setChatId(user_id)
@@ -651,16 +708,19 @@ class Bot : TelegramLongPollingBot()
             val keyboardFourthRow = KeyboardRow()
             val keyboardFifthRow = KeyboardRow()
             val keyboardSixRow = KeyboardRow()
+            val keyboardSeventhRow = KeyboardRow()
             keyboardFirstRow.add(KeyboardButton("$button_text1"))
             keyboardFirstRow.add(KeyboardButton("$button_text2"))
             keyboardSecondRow.add(KeyboardButton("$button_text3"))
             keyboardSecondRow.add(KeyboardButton("$button_text4"))
+            keyboardSeventhRow.add(KeyboardButton("$button_text11"))
             keyboardThirdRow.add(KeyboardButton("$button_text5"))
             keyboardThirdRow.add(KeyboardButton("$button_text6"))
             keyboardFourthRow.add(KeyboardButton("$button_text7"))
             keyboardFourthRow.add(KeyboardButton("$button_text10"))
             keyboardFifthRow.add(KeyboardButton("$button_text8"))
             keyboardSixRow.add(KeyboardButton("$button_text9"))
+            keyboardSixRow.add(KeyboardButton("$button_text12"))
             keyboard.add(keyboardFirstRow)
             keyboard.add(keyboardSixRow)
 
@@ -673,6 +733,7 @@ class Bot : TelegramLongPollingBot()
                     keyboard.add(keyboardThirdRow)
                     keyboard.add(keyboardFourthRow)
                     keyboard.add(keyboardFifthRow)
+                    keyboard.add(keyboardSeventhRow)
                 }
                 if(role == 1)
                 {
@@ -1168,6 +1229,21 @@ class Bot : TelegramLongPollingBot()
 
 
                 }
+                "Add Lesson"->
+                {
+                    btn_done(user_id)
+                    users_pos.replace(user_id,20)
+                    db.update_position(user_id,20)
+                    var text = "    *Univer LIST*\n"
+
+                    for(a in univerlist.keys) {
+
+                        text += "``` ${univerlist.get(a)} - ${a}```\n"
+                    }
+                    sendMessage(user_id,text)
+                    sendMessage(user_id,"` Enter Univer_id`")
+
+                }
                 "Статистика"->
                 {
                     var text = "`Книг: ${books.size}. Пользователей : ${users.size}. \n   Из них` \n"
@@ -1248,6 +1324,25 @@ class Bot : TelegramLongPollingBot()
                     {
                         univer_stats(user_id,message)
                     }
+                }
+                "Онлайн Уроки"->
+                {
+                    val univer = users.get(user_id)
+                    var text = "*** Номер гр. -\tНазвание гр. \n***"
+                    var i=1
+                    while (i < db.read_lesson(univer!![3])[0][3].toInt() )
+                    {
+                        text += "`\t\t\t\t\t\t\t$i - ${db.read_lesson(univer[3])[i][1]}` \n"
+                        i++
+                        println(text)
+                    }
+                    val text2 = "__Введите номер группы!__"
+                    sendMessage(user_id,text)
+                    sendMessage(user_id,text2 )
+                    users_pos.replace(user_id,23)
+                    db.update_position(user_id,23)
+                    btn_done(user_id)
+
                 }
                 "Поиск"->
                 {

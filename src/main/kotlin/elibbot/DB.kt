@@ -5,7 +5,7 @@ import java.sql.DriverManager
 import java.sql.Statement
 import kotlin.system.exitProcess
 
-//const val connect = "jdbc:postgres://seallheo:zc2-JGbg8Q9LClrrCkFcKxJ9rS8UDXGY@drona.db.elephantsql.com:5432/seallheo"
+//const val connect = "jdbc:postgresql://localhost:5432/postgres"
 const val connect = "jdbc:postgresql://drona.db.elephantsql.com:5432/seallheo"
 //const val user = "postgres"
 const val user = "seallheo"
@@ -21,13 +21,11 @@ open class DB {
                 .getConnection(connect, user, pass)
             println("Database opened successfully")
             stmt = c!!.createStatement()
-            val sql = "CREATE TABLE BOOKS" +
-                    "(ID               SERIAL PRIMARY KEY,"  +
-                    " FILE_ID           TEXT   NOT NULL,"    +
-                    " NAME              TEXT   NOT NULL,"    +
-                    " AUTH_NAME         TEXT   NOT NULL,"    +
-                    " CATEGORY          TEXT   NOT NULL,"    +
-                    " CATEGORY_ID        INT   NOT NULL)"
+            val sql = "CREATE TABLE LESSONS" +
+                    "(ID               SERIAL PRIMARY KEY,"   +
+                    " Univer_id            INT    NOT NULL,"  +
+                    " NAME                 TEXT   NOT NULL,"  +
+                    " TEXT              VARCHAR   NOT NULL)"
             stmt!!.executeUpdate(sql)
             stmt.close()
             c.close()
@@ -59,7 +57,7 @@ open class DB {
 
 
             stmt = c.createStatement()
-            var sql: String = "INSERT INTO USERS (ID,FIRSTNAME,LASTNAME,USERNAME,UNIVERSITY_ID,ROLE,BOOKS_ID,BOOKS_NUM,POSITION) VALUES ( $user_id,'$firstname','$lastname','$username',$univer_id,$role,'$books_id',$books_num,$position);"
+            var sql: String = "INSERT INTO USERS (ID,FIRSTNAME,LASTNAME,USERNAME,UNIVERSITY_ID,ROLE,BOOKS_ID,BOOKS_NUM,POSITION) VALUES ( '$user_id','$firstname','$lastname','$username',$univer_id,$role,'$books_id',$books_num,$position);"
             stmt.executeUpdate(sql)
 
             stmt.close()
@@ -71,6 +69,30 @@ open class DB {
         }
 
     }
+    open fun write_lesson(univer:Int, name: String,text: String) {
+        var c: Connection? = null
+        var stmt: Statement? = null
+        try {
+            Class.forName("org.postgresql.Driver")
+            c = DriverManager
+                .getConnection(connect, user, pass)
+            c!!.autoCommit = false
+
+
+            stmt = c.createStatement()
+            var sql: String = "INSERT INTO LESSONS (Univer_id,NAME,TEXT) VALUES ('$univer','$name','$text');"
+            stmt.executeUpdate(sql)
+
+            stmt.close()
+            c.commit()
+            c.close()
+        } catch (e: Exception) {
+            System.err.println(e.javaClass.name + ": " + e.message)
+            System.exit(0)
+        }
+
+    }
+
 
     open fun write_univer(name:String)
     {
@@ -306,7 +328,6 @@ open class DB {
             val rs = stmt!!.executeQuery("SELECT * FROM USERS;")
 
             var t = 0
-
             while (rs.next()) {
                 val id = rs.getInt("id")
                 val firstname = rs.getString("firstname")
@@ -459,6 +480,85 @@ open class DB {
         }
         return test
     }
+
+    open fun read_lesson(message:String): Array<Array<String>> {
+        var c: Connection? = null
+        var stmt: Statement? = null
+        var i =0
+        var test2 =0
+        var test=read1_lesson(i,message)
+        if(test ==0)
+        {
+            test2 = 1
+        }
+        else {
+            test2 = test
+        }
+        var temp: Array<Array<String>> = Array(test2, { Array(4, {"0"}) })
+
+        try {
+            Class.forName("org.postgresql.Driver")
+            c = DriverManager
+                .getConnection(connect, user, pass)
+            c!!.autoCommit = false
+
+
+            stmt = c.run { createStatement() }
+            val rs = stmt!!.executeQuery("SELECT * FROM lessons where univer_id=$message;")
+
+            var t = 0
+
+            while (rs.next()) {
+                val univer = rs.getInt("univer_id")
+                val name = rs.getString("name")
+                val text = rs.getString("text")
+                temp[t][0] = univer.toString()
+                temp[t][1] = name
+                temp[t][2] = text
+
+                t++
+            }
+
+            rs.close()
+            stmt.close()
+            c.close()
+
+            temp[0][3]=test.toString()
+        } catch (e: Exception) {
+            System.err.println(e.javaClass.name + ": " + e.message)
+            System.exit(0)
+        }
+
+        println("Operation READ done successfully")
+        return temp
+    }
+    fun read1_lesson(i:Int, message: String): Int {
+        var c: Connection? = null
+        var stmt: Statement? = null
+        var test =i
+        try {
+            Class.forName("org.postgresql.Driver")
+            c = DriverManager
+                .getConnection(connect, user, pass)
+            c!!.autoCommit = false
+
+            stmt = c.createStatement()
+            val rs = stmt!!.executeQuery("SELECT * FROM lessons where univer_id=$message;")
+            while (rs.next()) {
+                test++
+
+            }
+            rs.close()
+            stmt.close()
+            c.close()
+
+        } catch (e: Exception) {
+            System.err.println(e.javaClass.name + ": " + e.message)
+            System.exit(0)
+        }
+        return test
+    }
+
 
     open fun update_info(user_id: Long, books_id: String, books_num: Int, position: Int) {
         var c: Connection? = null
