@@ -439,7 +439,7 @@ class Bot : TelegramLongPollingBot()
                                var array = archived.get(user_id)
                                if (!array!!.contains(fileid)) {
                                    array.plus(fileid)
-                                   archived.put(user_id, array)
+                                   archived.replace(user_id, array)
                                    var info = users[user_id]!![8]
                                    info = "$info,$fileid"
                                    db.update_archive(user_id, info)
