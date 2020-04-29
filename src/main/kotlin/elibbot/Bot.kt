@@ -1328,10 +1328,10 @@ class Bot : TelegramLongPollingBot()
                 {
                     val univer = users.get(user_id)
                     var text = "*** Номер гр. -\tНазвание гр. \n***"
-                    var i=1
+                    var i=0
                     while (i <= db.read_lesson(univer!![3])[0][3].toInt() )
                     {
-                        text += "`\t\t\t\t\t\t\t$i - ${db.read_lesson(univer[3])[i][1]}` \n"
+                        text += "`\t\t\t\t\t\t\t${i+1} - ${db.read_lesson(univer[3])[i][1]}` \n"
                         i++
                     }
                     val text2 = "__Введите номер группы!__"
