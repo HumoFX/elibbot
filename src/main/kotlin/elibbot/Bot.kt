@@ -371,18 +371,20 @@ class Bot : TelegramLongPollingBot()
                        {
                            if(message != "Готово") {
                                val univer = users[chat_id]!![3]
-                               var lesson = univer_lesson[univer.toInt()]
+                               val lesson = univer_lesson[univer.toInt()]
                                if (lesson != null) {
                                    if (lesson.contains(message.toInt()-1)) {
                                        var text = "*** Расписание группы - ${db.read_lesson(univer)[message.toInt()-1][1]} \n ***"
                                        text += db.read_lesson(univer)[message.toInt()-1][2]
                                        sendMessage(chat_id,text)
+                                       lessons.clear()
                                        maintenance(chat_id)
                                    } else {
                                        sendMessage(chat_id, "``` Неверный номер.Введите заново!```")
                                    }
                                }
                            }
+                           lessons.clear()
                            buttongroup2(chat_id, message)
 
                        }
