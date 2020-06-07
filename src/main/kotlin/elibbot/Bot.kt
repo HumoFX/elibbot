@@ -66,8 +66,6 @@ class Bot : TelegramLongPollingBot()
         {
             if(!(this.inited))
             {
-                db.CREATE()
-                db.CREATE1()
                 UniverRole.put("Студент",1)
                 UniverRole.put("Преподователь",2)
                 UniverRole.put("Администрация",3)
