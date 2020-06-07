@@ -1016,12 +1016,13 @@ class Bot : TelegramLongPollingBot()
                         rowsInline.add(listOf(rowInline[id-1]))
 
                     }
-                    rowInline.add(InlineKeyboardButton().setText("Учителя").setCallbackData("teach"))
-                    rowsInline.add(listOf(rowInline[id]))
 
 
 
                 }
+                rowInline.add(InlineKeyboardButton().setText("Учителя").setCallbackData("teach"))
+                rowsInline.add(listOf(rowInline[id]))
+
 
 
             }
