@@ -1020,13 +1020,14 @@ class Bot : TelegramLongPollingBot()
 
 
                 }
-                rowInline.add(InlineKeyboardButton().setText("Учителя").setCallbackData("teach"))
-                rowsInline.add(listOf(rowInline[id]))
+
 
 
 
             }
-
+            val rowInline1 = ArrayList<InlineKeyboardButton>()
+            rowInline1.add(InlineKeyboardButton().setText("Учителя").setCallbackData("teach"))
+            rowsInline.add(listOf(rowInline1[0]))
 
 
 
