@@ -20,7 +20,6 @@ import org.telegram.telegrambots.meta.exceptions.TelegramApiException
 import java.io.File
 import java.io.FileInputStream
 import java.io.InputStream
-import java.lang.NumberFormatException
 import java.text.SimpleDateFormat
 import java.util.*
 import kotlin.collections.ArrayList
@@ -38,6 +37,10 @@ class Bot : TelegramLongPollingBot()
         private var file_ids = arrayListOf<String>()
         private var users_pos  = mutableMapOf<Long,Int>()
         private var books = mutableMapOf<String,ArrayList<String>>()
+        private var teacher = mutableMapOf<Int,ArrayList<ArrayList<String>>>()
+        private var teacher_size = ArrayList<ArrayList<String>>()
+        private var files_size = mutableMapOf<String, ArrayList<String>>()
+        private var addFile = mutableMapOf<Int,ArrayList<ArrayList<String>>>()
         private var books_id = arrayListOf<String>()
         private var books_name = arrayListOf<String>()
         private var lessons = mutableMapOf<Long,ArrayList<String>>()
@@ -45,6 +48,7 @@ class Bot : TelegramLongPollingBot()
         private var book_file = mutableMapOf<String,String>()
         private var admin_add_book = mutableMapOf<Long,String>()
         private var admin_add_photo = mutableMapOf<Long,String>()
+        private var admin_add_file = mutableMapOf<Long,Int>()
         private var inited = false
         private var registr = mutableMapOf<Long,ArrayList<String>>()
         private var admins = mutableMapOf<Long, Int>()
@@ -62,6 +66,8 @@ class Bot : TelegramLongPollingBot()
         {
             if(!(this.inited))
             {
+                db.CREATE()
+                db.CREATE1()
                 UniverRole.put("Студент",1)
                 UniverRole.put("Преподователь",2)
                 UniverRole.put("Администрация",3)
@@ -101,8 +107,69 @@ class Bot : TelegramLongPollingBot()
                     i++
 
                 }
+                var teachers = db.read_teacher()
+
+                if(teachers[0][3].toInt() > 0) {
+
+                    for ((univ, univN) in univerlist) {
+//                        println("SS")
+                        var arrays = ArrayList<ArrayList<String>>()
+
+
+                        var c = 0
+                        while (c < teachers[0][3].toInt()) {
+//                            println("univ = $univ  techuniv = ${teachers[c][1]}")
+                            if (univ == teachers[c][1].toInt()) {
+                                var array = ArrayList<String>()
+//                                println("SS2")
+
+                                array.add(teachers[c][0])
+                                array.add(teachers[c][2])
+                                arrays.add(array)
+                                array.add(univ.toString())
+                                teacher_size.add(array)
+
+                            }
+                            c++
+                        }
+                        teacher.put(univ, arrays)
+//                        println("teach $teacher")
+                    }
+                    println(teacher_size)
+
+                }
+
+                var file = db.read_file()
+                println("${file[0][0]} ${file[0][1]} ${file[0][2]} ${file[0][3]} ${file[0][4]} ${file[0][5]} ")
+                var j =0
+                while (j < teacher_size.size)
+                {
+                    var array = ArrayList<ArrayList<String>>()
+
+                    var c = 0
+                    while (c < file[0][5].toInt())
+                    {
+                        if( teacher_size[j][0].toInt() == file[c][2].toInt())
+                        {
+                          var arr = ArrayList<String>()
+                          arr.add(file[c][4])
+                          arr.add(file[c][3])
+                          arr.add(file[c][1])
+                          arr.add(file[c][0])
+                           array.add(arr)
+                            files_size.put(file[c][0],arr)
+                        }
+                        c++
+                    }
+                    addFile.put(teacher_size[j][0].toInt(),array)
+                    j++
+                }
+
+
+
                 var db_user = db.read_user()
                 var db_user_size = db_user[0][10].toInt()
+
 
                 i = 0
                 while( i < db_user_size)
@@ -145,6 +212,7 @@ class Bot : TelegramLongPollingBot()
                    // user_info.clear()
                     i++
                 }
+
                 inited = true
             }
 
@@ -180,6 +248,10 @@ class Bot : TelegramLongPollingBot()
                            getFiles(chat_id, file)
                            add_book(chat_id)
                            buttongroup2(chat_id,message)
+                       }
+                       if(pos == 34){
+                           getNewFile(chat_id,file)
+
                        }
                    }
                    //join(chat_id)
@@ -246,14 +318,7 @@ class Bot : TelegramLongPollingBot()
                            deleteMessage(chat_id,message_id-1)
                            deleteMessage(chat_id,message_id-2)
                        }
-//                       if(pos == 1)
-//                       {
-//                           get_groupname(chat_id)
-//                     //      buttongroup2(chat_id,message)
-//
-//                       }
-
-                       if(pos == 2)
+                       else if(pos == 2)
                        {
                            db.update_group(chat_id,message)
                            var array = users[chat_id]
@@ -264,15 +329,12 @@ class Bot : TelegramLongPollingBot()
                            maintenance(chat_id)
 
                        }
-                       if(pos == 3)
+                       else if(pos == 3)
                        {
                            buttongroup2(chat_id,message)
                        }
-                       if(pos == 4)
-                       {
 
-                       }
-                       if(pos == 5)
+                       else if(pos == 5)
                        {
                            if(message!="Готово") {
                                if (posting_photo.containsKey(chat_id)) {
@@ -287,106 +349,198 @@ class Bot : TelegramLongPollingBot()
                            }
 
                        }
-                       if(pos == 6)
-                       {
-                           add_admin(chat_id,message)
-                           buttongroup2(chat_id,message)
-                       }
-                       if(pos == 7)
-                       {
-                           add_super_admin(chat_id,message)
-                           buttongroup2(chat_id,message)
-
-                       }
-                       if(pos == 8)
-                       {
-                           add_univer(chat_id,message)
-                           buttongroup2(chat_id,message)
-                       }
-                       if(pos == 9)
-                       {
-                            buttongroup1(chat_id,message)
-                       }
-                       if(pos == 10)
-                       {
-                           buttongroup2(chat_id,message)
-                       }
-                       if(pos == 12 )
-                       {
-                           if(message != "Готово") {
-                               if (univerlist.containsKey(message.toInt())) {
-                                   admin_univer_id.put(chat_id, message.toInt())
-                                   users_pos.replace(chat_id, 10)
-                                   db.update_position(chat_id, 10)
-                                   sendMessage(chat_id, "``` Send/Forward Photo then Book```")
-                               } else {
-                                   sendMessage(chat_id, "``` Incorrect ID!Enter Again```")
-                               }
+                       //println("ALLBOOKS $books")
+                       //println("book_info1 $book_info")
+                       //sendDocument(user_id,get_book_id)
+                       when (pos) {
+                           6 -> {
+                               add_admin(chat_id,message)
+                               buttongroup2(chat_id,message)
                            }
-                           buttongroup2(chat_id, message)
-                       }
-                       if(pos == 13)
-                       {
-                           if(message != "Готово" && !message.startsWith("/start")) {
-                               search(chat_id, message)
-                           }
-                           buttongroup2(chat_id, message)
-                       }
-                       if (pos == 22)
-                       {
-                           var array = lessons.get(chat_id)!!.toMutableList()
-                           array.add(message)
-                           val univer = users.get(chat_id)
-                           admin_univer_id.get(chat_id)?.let { db.write_lesson(it,array.get(0),message) ; println("OK") }
-                           maintenance(chat_id)
-                       }
-                       if(pos == 21)
-                       {
-                           println("ABBA")
-                           var array = arrayListOf<String>()
-                           array.add(message)
-                           println(array.get(0))
-                           lessons.put(chat_id,array)
-                           sendMessage(chat_id,"Enter Text")
-                           users_pos.replace(chat_id,22)
-                           db.update_position(chat_id, 22)
+                           7 -> {
+                               add_super_admin(chat_id,message)
+                               buttongroup2(chat_id,message)
 
-                       }
-                       if(pos == 20)
-                       {
-                           if(message != "Готово") {
-                               if (univerlist.containsKey(message.toInt())) {
-                                   admin_univer_id.put(chat_id, message.toInt())
-                                   users_pos.replace(chat_id, 21)
-                                   db.update_position(chat_id, 21)
-                                   sendMessage(chat_id, "``` SEND GROUPNAME```")
-                               } else {
-                                   sendMessage(chat_id, "``` Incorrect ID!Enter Again```")
-                               }
                            }
-                           buttongroup2(chat_id, message)
-
-                       }
-                       if (pos == 23)
-                       {
-                           if(message != "Готово") {
-                               val univer = users[chat_id]!![3]
-                               val lesson = univer_lesson[univer.toInt()]
-                               if (lesson != null) {
-                                   if (lesson.contains(message.toInt()-1)) {
-                                       var text = "*** Расписание группы - ${db.read_lesson(univer)[message.toInt()-1][1]} \n ***"
-                                       text += db.read_lesson(univer)[message.toInt()-1][2]
-                                       sendMessage(chat_id,text)
-                                       lessons.clear()
-                                       maintenance(chat_id)
+                           8 -> {
+                               add_univer(chat_id,message)
+                               buttongroup2(chat_id,message)
+                           }
+                           9 -> {
+                               buttongroup1(chat_id,message)
+                           }
+                           10 -> {
+                               buttongroup2(chat_id,message)
+                           }
+                           12 -> {
+                               if(message != "Готово") {
+                                   if (univerlist.containsKey(message.toInt())) {
+                                       admin_univer_id.put(chat_id, message.toInt())
+                                       users_pos.replace(chat_id, 10)
+                                       db.update_position(chat_id, 10)
+                                       sendMessage(chat_id, "``` Send/Forward Photo then Book```")
                                    } else {
-                                       sendMessage(chat_id, "``` Неверный номер.Введите заново!```")
+                                       sendMessage(chat_id, "``` Incorrect ID!Enter Again```")
                                    }
                                }
+                               buttongroup2(chat_id, message)
                            }
-                           lessons.clear()
-                           buttongroup2(chat_id, message)
+                           13 -> {
+                               if(message != "Готово" && !message.startsWith("/start")) {
+                                   search(chat_id, message)
+                               }
+                               buttongroup2(chat_id, message)
+                           }
+                           22 -> {
+                               var array = lessons.get(chat_id)!!.toMutableList()
+                               array.add(message)
+                               val univer = users.get(chat_id)
+                               admin_univer_id.get(chat_id)?.let { db.write_lesson(it,array.get(0),message) ; println("OK") }
+                               maintenance(chat_id)
+                           }
+                           21 -> {
+                               var array = arrayListOf<String>()
+                               array.add(message)
+                               lessons.put(chat_id,array)
+                               sendMessage(chat_id,"Enter Text")
+                               users_pos.replace(chat_id,22)
+                               db.update_position(chat_id, 22)
 
+                           }
+                           20 -> {
+                               if(message != "Готово") {
+                                   if (univerlist.containsKey(message.toInt())) {
+                                       admin_univer_id.put(chat_id, message.toInt())
+                                       users_pos.replace(chat_id, 21)
+                                       db.update_position(chat_id, 21)
+                                       sendMessage(chat_id, "``` SEND GROUPNAME```")
+                                   } else {
+                                       sendMessage(chat_id, "``` Incorrect ID!Enter Again```")
+                                   }
+                               }
+                               buttongroup2(chat_id, message)
+
+                           }
+                           30 -> {
+                               if(message != "Готово") {
+                                   if (univerlist.containsKey(message.toInt())) {
+                                       admin_univer_id.put(chat_id, message.toInt())
+                                       users_pos.replace(chat_id, 31)
+                                       db.update_position(chat_id, 31)
+                                       sendMessage(chat_id, "``` SEND TEACHER's NAME```")
+                                   } else {
+                                       sendMessage(chat_id, "``` Incorrect ID!Enter Again```")
+                                   }
+                               }
+                               buttongroup2(chat_id, message)
+
+                           }
+                           31 -> {
+                               if(message != "Готово") {
+                                   var array = ArrayList<ArrayList<String>>()
+                                   var arr = ArrayList<String>()
+                                   arr.add(teacher_size.size.toString())
+                                   arr.add(message)
+                                   array.add(arr)
+
+                                   val univer_id = admin_univer_id[chat_id]
+                                   arr.add(univer_id.toString())
+                                   teacher_size.add(arr)
+                                   if (!teacher.containsKey(univer_id!!))
+                                   {
+                                       teacher.put(univer_id!!,array)
+                                       db.write_teacher(univer_id,message)
+                                   }
+                                   else{
+//                                       var arrays = ArrayList<ArrayList<String>>()
+                                       var arrays = teacher[univer_id]!!
+//                                       teacher_size.add(arr)
+                                       arrays.add(arr)
+                                       teacher.replace(univer_id,arrays)
+                                       db.write_teacher(univer_id,message)
+                                   }
+                                   sendMessage(chat_id,"Added")
+
+                               }
+                               buttongroup2(chat_id, message)
+
+                           }
+                           23 -> {
+                               if(message != "Готово") {
+                                   val univer = users[chat_id]!![3]
+                                   val lesson = univer_lesson[univer.toInt()]
+                                   if (lesson != null) {
+                                       if (lesson.contains(message.toInt()-1)) {
+                                           var text = "*** Расписание группы - ${db.read_lesson(univer)[message.toInt()-1][1]} \n ***"
+                                           text += db.read_lesson(univer)[message.toInt()-1][2]
+                                           sendMessage(chat_id,text)
+                                           lessons.clear()
+                                           maintenance(chat_id)
+                                       } else {
+                                           sendMessage(chat_id, "``` Неверный номер.Введите заново!```")
+                                       }
+                                   }
+                               }
+                               lessons.clear()
+                               buttongroup2(chat_id, message)
+
+                           }
+                           32->{
+                               if(message != "Готово") {
+                                   if (univerlist.containsKey(message.toInt())) {
+                                       admin_univer_id.put(chat_id, message.toInt())
+
+//                                       sendMessage(chat_id,"```TEACHERS  ${teacher.get}```")
+                                       if(teacher.containsKey(message.toInt()))
+                                       {
+                                           var c = 1
+                                           var text = "TEACHERS\n"
+                                           for ( i in teacher[message.toInt()]!!)
+                                           {
+                                               text += "$c - ${i[1]}\n"
+                                               c++
+                                           }
+                                           sendMessage(chat_id,text)
+                                           users_pos.replace(chat_id, 33)
+                                           db.update_position(chat_id, 33)
+                                       }
+                                       else{
+                                           sendMessage(chat_id,"NO TEACHERS")
+                                           maintenance(chat_id)
+                                       }
+
+                                       sendMessage(chat_id, "``` SEND TEACHER's ID```")
+                                   } else {
+                                       sendMessage(chat_id, "``` Incorrect ID!Enter Again```")
+                                   }
+                               }
+                               buttongroup2(chat_id, message)
+                           }
+                           33->{
+                               if (message != "Готово")
+                               {
+                                   val univer_id = admin_univer_id.get(chat_id)
+                                   var array = teacher[univer_id]!!
+                                   println(" size  =  ${array.size}")
+                                   if (message.toInt() <= array.size )
+                                   {
+                                       println("te  ${array[message.toInt() - 1]}")
+                                       admin_add_file.put(chat_id,array[message.toInt() - 1][0].toInt())
+                                       sendMessage(chat_id, "``` SEND FILE ```")
+                                       users_pos.replace(chat_id,34)
+                                       db.update_position(chat_id,34)
+                                   }
+                                   else {
+                                       sendMessage(chat_id, "INCORRECT ID! Try again")
+                                   }
+                               }
+                               else{
+                                   buttongroup2(chat_id,message)
+                               }
+                           }
+                           34->{
+                               buttongroup2(chat_id,message)
+                           }
                        }
 
 
@@ -457,6 +611,137 @@ class Bot : TelegramLongPollingBot()
                            execute(answer)
                        } catch (e: TelegramApiException) {
                            e.printStackTrace()
+                       }
+                   }
+                   else if (call_data.startsWith("ol")){
+                       val num = call_data.substring(2)
+                       val univer = users[user_id]!![3]
+                       val lesson = univer_lesson[univer.toInt()]
+                       if (lesson != null) {
+                           var text = "*** Расписание группы - ${db.read_lesson(univer)[num.toInt()-1][1]} \n ***"
+                           text += db.read_lesson(univer)[num.toInt()-1][2]
+                           sendMessage(user_id,text)
+                           lessons.clear()
+                           maintenance(user_id)
+
+                       }
+
+                   }
+                   else if (call_data == "teach"){
+                       val univer = users[user_id]!![3]
+                       val size = teacher[univer.toInt()]!!.size
+                       var arrays = teacher[univer.toInt()]!!
+                       var markupInline = InlineKeyboardMarkup()
+                       val rowsInline = ArrayList<List<InlineKeyboardButton>>()
+                       val rowInline = ArrayList<InlineKeyboardButton>()
+//            var last = array.last()
+                       var a = 0
+                       var text = "*** Учителя\n ***"
+                       var c = 1
+                       var array = ArrayList<Int>()
+                       for ( i in teacher[univer.toInt()]!!)
+                       {
+                           array.add(c)
+                           text += "$c - ${i[1]}\n"
+                           c++
+                       }
+
+                       for (id in array) {
+//                           println("rowsize ${array.size}")
+//                           sendMessage(user_id,text)
+//                           users_pos.replace(user_id, 33)
+//                           db.update_position(user_id, 33)
+
+                           if (array.size - a >=5)
+                           {
+                               rowInline.add(InlineKeyboardButton().setText(id.toString()).setCallbackData("t$id"))
+                               println("rowsize ${rowInline.size}")
+                               println(rowInline.size.rem(5))
+                               if((rowInline.size - a).rem(5) == 0)
+                               {
+
+                                   rowsInline.add(arrayListOf(rowInline[id - 5],rowInline[id - 4],rowInline[id - 3],rowInline[id - 2],rowInline[id-1]))
+                                   a += 5
+                                   println("rowsize ${rowInline.size}")
+                               }
+                           }
+                           else if (array.size - a <5)
+                           {
+                               println("rowsize ${rowInline.size}")
+                               rowInline.add(InlineKeyboardButton().setText(id.toString()).setCallbackData("t$id"))
+                               if(array.size - a == 4)
+                               {
+                                   if((rowInline.size-a).rem(4) == 0)
+                                   {
+                                       rowsInline.add(arrayListOf(rowInline[id - 4],rowInline[id - 3],rowInline[id - 2],rowInline[id-1]))
+                                       a += 4
+                                   }
+                               }
+                               else if(array.size - a == 3)
+                               {
+                                   if((rowInline.size-a).rem(3) == 0)
+                                   {
+                                       rowsInline.add(arrayListOf(rowInline[id - 3],rowInline[id - 2],rowInline[id-1]))
+                                       a += 3
+                                   }
+                               }
+                               else if(array.size - a == 2)
+                               {
+                                   if((rowInline.size-a).rem(2) == 0)
+                                   {
+                                       rowsInline.add(arrayListOf(rowInline[id - 2],rowInline[id-1]))
+                                       a +=2
+                                   }
+                               }
+                               else if(array.size - a == 1)
+                               {
+                                   rowsInline.add(listOf(rowInline[id-1]))
+                               }
+                           }
+                       }
+                       val message = SendMessage() // Create a message object object
+                           .setChatId(user_id)
+                           .setParseMode("Markdown")
+                           .setText(text)
+
+                       markupInline.keyboard = rowsInline
+                       message.replyMarkup = markupInline
+                       try {
+                           execute(message) // Sending our message object to user
+                       } catch (e: TelegramApiException) {
+                           e.printStackTrace()
+                       }
+                   }
+                   else if (call_data.startsWith("t"))
+                   {
+                       val num = call_data.substring(1)
+                       val univer_id = users[user_id]!![3].toInt()
+                       var array = teacher[univer_id]!!
+                       println(" size  =  ${array.size}")
+                       if (num.toInt() <= array.size )
+                       {
+                           println("te  ${array[num.toInt() - 1]}")
+                           var arrays = addFile[array[num.toInt() - 1][0].toInt()]
+                           println(arrays)
+                           var text  = "${array[num.toInt() - 1][1]}\n"
+                           var i = 0
+                           if (arrays!!.size >=1){
+                               while (i < arrays.size)
+                               {
+                                   println("c = $arrays")
+                                  text += " ${i+1}.[${arrays[i][1]}](t.me/Qrbookbot?start=FILE${arrays[i][3]})\n"
+                                   i++
+                               }
+                           }
+                           else
+                           {
+                               text = "Пока нет файлов"
+                           }
+
+
+//                           admin_add_file.put(user_id,array[num.toInt() - 1][0].toInt())
+                           sendMessage(user_id, text)
+
                        }
                    }
                    else {
@@ -652,6 +937,117 @@ class Bot : TelegramLongPollingBot()
 
         }
 
+        private fun lessonButton(user_id: Long){
+            val univer = users[user_id]
+            var text = "*** Номер гр. -\tНазвание гр. \n***"
+            var i=0
+            var array = ArrayList<Int>()
+            var array_group = ArrayList<String>()
+            while (i < db.read_lesson(univer!![3])[0][3].toInt() )
+            {
+                array.add(i+1)
+                text += "`\t\t\t\t\t\t\t${i+1} - ${db.read_lesson(univer[3])[i][1]}` \n"
+                array_group.add(db.read_lesson(univer[3])[i][1])
+                i++
+            }
+            univer_lesson.put(univer[3].toInt(),array)
+            val text2 = "__Введите номер группы!__"
+            sendMessage(user_id,text)
+//
+//            users_pos.replace(user_id,23)
+//            db.update_position(user_id,23)
+            var markupInline = InlineKeyboardMarkup()
+            val rowsInline = ArrayList<List<InlineKeyboardButton>>()
+            val rowInline = ArrayList<InlineKeyboardButton>()
+//            var last = array.last()
+            var a = 0
+            for (id in array) {
+                println("rowsize ${array.size}")
+
+                if (array.size - a >=5)
+                {
+                    rowInline.add(InlineKeyboardButton().setText(id.toString()).setCallbackData("ol$id"))
+                    println("rowsize ${rowInline.size}")
+                    println(rowInline.size.rem(5))
+//                    println("rw ${rowInline.get(id-1)}")
+                    if((rowInline.size - a).rem(5) == 0)
+                    {
+//                        rowsInline.add(rowInline)
+
+                        rowsInline.add(arrayListOf(rowInline[id - 5],rowInline[id - 4],rowInline[id - 3],rowInline[id - 2],rowInline[id-1]))
+                        a += 5
+                        println("rowsize ${rowInline.size}")
+
+                    }
+                }
+                else if (array.size - a <5)
+                {
+                    println("rowsize ${rowInline.size}")
+
+                    rowInline.add(InlineKeyboardButton().setText(id.toString()).setCallbackData("ol$id"))
+                    if(array.size - a == 4)
+                    {
+                        if((rowInline.size-a).rem(4) == 0)
+                        {
+                            rowsInline.add(arrayListOf(rowInline[id - 4],rowInline[id - 3],rowInline[id - 2],rowInline[id-1]))
+
+                            a += 4
+                        }
+                    }
+                    else if(array.size - a == 3)
+                    {
+                        if((rowInline.size-a).rem(3) == 0)
+                        {
+                            rowsInline.add(arrayListOf(rowInline[id - 3],rowInline[id - 2],rowInline[id-1]))
+                            a += 3
+
+                        }
+                    }
+                    else if(array.size - a == 2)
+                    {
+                        if((rowInline.size-a).rem(2) == 0)
+                        {
+                            rowsInline.add(arrayListOf(rowInline[id - 2],rowInline[id-1]))
+                            a +=2
+
+                        }
+                    }
+                    else if(array.size - a == 1)
+                    {
+
+                        rowsInline.add(listOf(rowInline[id-1]))
+
+                    }
+                    rowInline.add(InlineKeyboardButton().setText("Учителя").setCallbackData("teach"))
+                    rowsInline.add(listOf(rowInline[id]))
+
+
+
+                }
+
+
+            }
+
+
+
+
+
+
+            val message = SendMessage() // Create a message object object
+                .setChatId(user_id)
+                .setParseMode("Markdown")
+                .setText(text2)
+
+            markupInline.keyboard = rowsInline
+            message.replyMarkup = markupInline
+            try {
+                execute(message) // Sending our message object to user
+            } catch (e: TelegramApiException) {
+                e.printStackTrace()
+            }
+
+        }
+
         private fun role(user_id: Long)
         {
             var text = "Выберите вашу роль в ВУЗе"
@@ -686,6 +1082,7 @@ class Bot : TelegramLongPollingBot()
             var text = "Меню"
             var button_text1 = "Архив"
             var button_text2 = "Статистика"
+            var button_text15 = "Список книг"
             var button_text3 = "Add Univer"
             var button_text4 = "Add book"
             var button_text5 = "Add admin"
@@ -695,6 +1092,8 @@ class Bot : TelegramLongPollingBot()
             var button_text9 = "Поиск"
             var button_text10 = "Reload"
             var button_text11 = "Add Lesson"
+            var button_text13 = "Add Teacher"
+            var button_text14 = "Add File"
             val button_text12 = "Онлайн Уроки"
             val replyKeyboardMarkup = ReplyKeyboardMarkup()
             val message = SendMessage()
@@ -715,11 +1114,16 @@ class Bot : TelegramLongPollingBot()
             val keyboardFifthRow = KeyboardRow()
             val keyboardSixRow = KeyboardRow()
             val keyboardSeventhRow = KeyboardRow()
+            val keyboardEighthRow = KeyboardRow()
             keyboardFirstRow.add(KeyboardButton("$button_text1"))
             keyboardFirstRow.add(KeyboardButton("$button_text2"))
+            keyboardFirstRow.add(KeyboardButton("$button_text15"))
             keyboardSecondRow.add(KeyboardButton("$button_text3"))
             keyboardSecondRow.add(KeyboardButton("$button_text4"))
             keyboardSeventhRow.add(KeyboardButton("$button_text11"))
+            keyboardSeventhRow.add(KeyboardButton("$button_text12"))
+            keyboardEighthRow.add(KeyboardButton("$button_text13"))
+            keyboardEighthRow.add(KeyboardButton("$button_text14"))
             keyboardThirdRow.add(KeyboardButton("$button_text5"))
             keyboardThirdRow.add(KeyboardButton("$button_text6"))
             keyboardFourthRow.add(KeyboardButton("$button_text7"))
@@ -740,6 +1144,7 @@ class Bot : TelegramLongPollingBot()
                     keyboard.add(keyboardFourthRow)
                     keyboard.add(keyboardFifthRow)
                     keyboard.add(keyboardSeventhRow)
+                    keyboard.add(keyboardEighthRow)
                 }
                 if(role == 1)
                 {
@@ -787,6 +1192,7 @@ class Bot : TelegramLongPollingBot()
             var count = 0
             var text = "``` По вашему запросу найдено : ```"
             var text2 = " "
+            var array = ArrayList<String>()
 //            var temp: Array<Array<String>> = Array(books.size, { Array(1, {"${books.values}"}) })
 //            while(a < books.size)
 //            {
@@ -801,6 +1207,7 @@ class Bot : TelegramLongPollingBot()
 //                }
 //                a++
 //            }
+            var c =0
             for((v,k) in books){
                 if (k[0].contains(message))
                 {
@@ -808,15 +1215,61 @@ class Bot : TelegramLongPollingBot()
                     {
                         if(j.contains(v))
                         {
+
                             count++
-                            text2 += " $count.[${k[0]}](t.me/Qrbookbot?start=${i})\n"
+//                            text2 += " $count.[${k[0]}](t.me/Qrbookbot?start=${i})\n"
+                            array.add(" $count.[${k[0]}](t.me/Qrbookbot?start=${i})\n")
+//                            if(c == 40)
+//                            {
+//                                text += "$count книг\n"
+//                                text += text2
+//                                sendMessage(user_id, text)
+//                                text2.drop(text2.length-1)
+//                                text.drop(text.length-1)
+//                                c = 0
+//                            }
+//                            c++
                         }
                     }
                 }
             }
-            text += "$count книг\n"
-            text += text2
-            sendMessage(user_id, text)
+//            var arr = array.size
+//            while (c < arr/40)
+//            {
+//                var i = 0
+//                var text2 = " "
+//                while ( i < 40)
+//                {
+//                   text2 += array[i]
+//                    i++
+//
+//                }
+//                while (i < 40)
+//                {
+//                    array.drop(i)
+//                }
+//
+//                text += text2
+//                sendMessage(user_id,text)
+//
+//            }
+            text += " $count  книг\n"
+            sendMessage(user_id,text)
+            var j =0
+            var b =0
+            while (b<array.size){
+                var text1 = " "
+                j = b
+                while( (b - j< 50) and (b<array.size))
+                {
+                    text1 += array[b]
+                    b++
+                }
+
+                sendMessage(user_id, text1)
+            }
+//            text += text2
+//            sendMessage(user_id, text)
         }
 
         private fun univer_stats(user_id: Long,message: String)
@@ -857,9 +1310,12 @@ class Bot : TelegramLongPollingBot()
         {
             //var text = "Added"
             if(message != "Готово") {
-                db.write_univer(message)
+                var index = univerlist.keys.last()
+                index += 1
+                print("UNIVER index = $index")
+                db.write_univer(index,message)
                 universities.add(message)
-                univerlist.put(univerlist.size,message)
+                univerlist.put(index,message)
                 //println("Univer $universities")
                 sendMessage(user_id, "Added")
             }
@@ -973,6 +1429,7 @@ class Bot : TelegramLongPollingBot()
         private fun archivate(user_id: Long,file_id: String)
         {
             println("file $file_id")
+            println("filelenght ${file_id.length}")
             var markupInline = InlineKeyboardMarkup()
             val rowsInline = ArrayList<List<InlineKeyboardButton>>()
             var button = "Архивировать"
@@ -981,16 +1438,34 @@ class Bot : TelegramLongPollingBot()
             rowsInline.add(rowInline)
             if (!book_file.contains(file_id))
             {
-                val answer = SendDocument()
-                    .setChatId(user_id)
-                    .setDocument(file_id)
-                markupInline.keyboard = rowsInline
-                answer.replyMarkup = markupInline
-                // println("a = $a")
-                try {
-                    execute(answer) // Sending our message object to user
-                } catch (e: TelegramApiException) {
-                    e.printStackTrace()
+                if(file_id.startsWith("FILE")){
+                    val id = file_id.substring(4)
+                    val files_id = files_size[id]!![0]
+                    println("files  == ${files_size[id]!![1]}")
+                    val answer = SendDocument()
+                        .setChatId(user_id)
+                        .setDocument(files_id)
+                    markupInline.keyboard = rowsInline
+                    answer.replyMarkup = markupInline
+                    // println("a = $a")
+                    try {
+                        execute(answer) // Sending our message object to user
+                    } catch (e: TelegramApiException) {
+                        e.printStackTrace()
+                    }
+                }
+                else {
+                    val answer = SendDocument()
+                        .setChatId(user_id)
+                        .setDocument(file_id)
+                    markupInline.keyboard = rowsInline
+                    answer.replyMarkup = markupInline
+                    // println("a = $a")
+                    try {
+                        execute(answer) // Sending our message object to user
+                    } catch (e: TelegramApiException) {
+                        e.printStackTrace()
+                    }
                 }
             }
             else{
@@ -1034,22 +1509,30 @@ class Bot : TelegramLongPollingBot()
         }
         private fun parser(user_id: Long,message: String): String {
 
-               val get_book_id = message.substring(7)
-              //  println("Book : $get_book_id")
-            if(isInteger(get_book_id))
-            {
+            val get_book_id = message.substring(7)
+            //  println("Book : $get_book_id")
+            if (isInteger(get_book_id)) {
                 val file_id = book_file[get_book_id]
                 if (file_id != null) {
-                    book_id.put(user_id,file_id)
+                    book_id.put(user_id, file_id)
                 }
                 return file_id.toString()
-            }
-            else
-            {
-                book_id.put(user_id,get_book_id)
-                return get_book_id
-            }
+            } else {
+                if (get_book_id.startsWith("FILE")) {
+                    val id = get_book_id.substring(4)
+                    if (files_size.containsKey(id)) {
+                        book_id[user_id] = files_size[id]!![0]
+                        println("books_id = $book_id")
+                    }
 
+                }
+                else{
+                    book_id[user_id] = get_book_id
+
+                }
+                return get_book_id
+
+            }
         }
         private fun update(user_id: Long,message: String,first_name: String,last_name:String,user_username:String)
         {
@@ -1058,7 +1541,7 @@ class Bot : TelegramLongPollingBot()
                 println("BOOOK $book_id")
                 if(message.length>=31)
                 {
-
+                    println("HERE")
                     var book_name = "xx"
                     if(users.containsKey(user_id))
                     {
@@ -1085,6 +1568,7 @@ class Bot : TelegramLongPollingBot()
                     }
                 }
                 else {
+                    println("THERE")
                     if (books.containsKey(book_id)) {
                         var books_info = books.get(book_id)
                         println("books_info $books_info")
@@ -1111,6 +1595,40 @@ class Bot : TelegramLongPollingBot()
                             //registration(user_id,message,first_name,last_name,user_username,univer_id.toInt(),0,book_name.toString(),1,0)
                         }
 
+                    }
+                    else if(book_id.startsWith("FILE"))
+                    {
+                        val id = book_id.substring(4)
+                        if (files_size.containsKey(id)) {
+                            println("id = $id")
+                            println("id = ${files_size[id]!![0][0]}")
+
+
+
+                            val book_name = files_size[id]!![0][1]
+                            println("THURE")
+                            if (users.containsKey(user_id)) {
+                                var user_info = users.get(user_id)
+                                var books_id = user_info?.get(5)
+                                books_id = if (books_id == " ") {
+                                    " $book_name"
+                                } else {
+                                    "$books_id, $book_name"
+                                }
+                                var books_num = user_info?.get(6)!!.toInt()
+                                books_num += 1
+                                var position = user_info.get(7)
+                                user_info[5] = books_id
+                                user_info[6] = books_num.toString()
+                                users.replace(user_id, user_info)
+                                db.update_info(user_id, books_id, books_num, position.toInt())
+                            } else {
+                                //   println("NO {${users.get(user_id)}")
+                                get_name(user_id)
+                                //registration(user_id,message,first_name,last_name,user_username,univer_id.toInt(),0,book_name.toString(),1,0)
+                            }
+
+                        }
                     }
                     else {
                         if (users.containsKey(user_id)) {
@@ -1151,6 +1669,56 @@ class Bot : TelegramLongPollingBot()
             file_ids.add(id)
             println("ID = $id   size = $size name  = $name")
 
+        }
+
+        private fun getNewFile(user_id: Long, file: Document)
+        {
+            val id = file.fileId
+            val name =  file.fileName
+            val teach_id = admin_add_file[user_id]
+//            var array = addFile[user_id]
+            var c = 0
+            var univer = "0"
+            while (c < teacher_size.size)
+            {
+                if(teacher_size[c][0].contains("$teach_id"))
+                {
+                    univer = teacher_size[c][2]
+                }
+                c++
+            }
+            if(addFile.containsKey(teach_id))
+            {
+                val array = addFile[teach_id]
+                val arr = ArrayList<String>()
+                arr.add(id)
+                arr.add(name)
+                arr.add(univer)
+                val size = files_size.maxBy { it.key.toInt() }!!.key.toInt() +1
+                arr.add(size.toString())
+                array!!.add(arr)
+                addFile.replace(teach_id!!,array)
+
+                println("size11 = $size")
+                files_size.put((size).toString(),arr)
+                db.write_file(size,univer.toInt(), teach_id,name,id)
+            }
+            else{
+                val array = ArrayList<ArrayList<String>>()
+                val arr = ArrayList<String>()
+                arr.add(id)
+                arr.add(name)
+                arr.add(univer)
+                val size = files_size.maxBy { it.key.toInt() }!!.key.toInt() +1
+                arr.add(size.toString())
+                array.add(arr)
+                addFile.put(teach_id!!,array)
+
+                println("size11 = $size")
+                files_size.put((size).toString(),arr)
+                db.write_file(size,univer.toInt(), teach_id,name,id)
+
+            }
         }
         fun add_admin(user_id: Long,message: String)
         {
@@ -1250,6 +1818,68 @@ class Bot : TelegramLongPollingBot()
                     sendMessage(user_id,"` Enter Univer_id`")
 
                 }
+                "Add Teacher"->
+                {
+                    btn_done(user_id)
+                    users_pos.replace(user_id,30)
+                    db.update_position(user_id,30)
+                    var text = "    *Univer LIST*\n"
+
+                    for(a in univerlist.keys) {
+
+                        text += "``` ${univerlist.get(a)} - ${a}```\n"
+                    }
+                    sendMessage(user_id,text)
+                    sendMessage(user_id,"` Enter Univer_id`")
+
+                }
+                "Add File"->
+                {
+                    btn_done(user_id)
+                    users_pos.replace(user_id,32)
+                    db.update_position(user_id,32)
+                    var text = "    *Univer LIST*\n"
+
+                    for(a in univerlist.keys) {
+
+                        text += "``` ${univerlist.get(a)} - ${a}```\n"
+                    }
+                    sendMessage(user_id,text)
+                    sendMessage(user_id,"` Enter Univer_id`")
+
+                }
+                "Список книг"->{
+//                    println("aloha")
+                    val text = " `Все книги: ${books.size}.` "
+                    var count =  0
+                    val array = ArrayList<String>()
+                    for((v,k) in books){
+                        for((i,j) in book_file)
+                        {
+                            if(j.contains(v))
+                            {
+                            count++
+//                                text += " $count.[${k[0]}](t.me/Qrbookbot?start=${i})\n"
+                            array.add(" $count.[${k[0]}](t.me/Qrbookbot?start=${i})\n")
+                            }
+                        }
+//                        println("aloha  == $count")
+                    }
+                    sendMessage(user_id,text)
+                    var j =0
+                    var b =0
+                    while (b<array.size){
+                        var text1 = " "
+                        j = b
+                        while( (b - j< 50) and (b<array.size))
+                        {
+                            text1 += array[b]
+                            b++
+                        }
+
+                        sendMessage(user_id, text1)
+                    }
+                }
                 "Статистика"->
                 {
                     var text = "`Книг: ${books.size}. Пользователей : ${users.size}. \n   Из них` \n"
@@ -1276,7 +1906,6 @@ class Bot : TelegramLongPollingBot()
                 {
                     var text = "\tВаш Архив:\n"
 
-                    println("HERE ${archived[user_id]}")
                     if(archived.containsKey(user_id)) {
                         val j = archived[user_id]
                         for (i in j!!) {
@@ -1286,6 +1915,11 @@ class Bot : TelegramLongPollingBot()
                                 val file = book_file[i]
                                 println("i = $i")
                                 text = " $text [${books[file]!![0]}](t.me/Qrbookbot?start=$i)\n"
+                            }
+                            else if (i.startsWith("FILE"))
+                            {
+                                val id = i.substring(4)
+                                text = " $text [${files_size[id]!![1]}](t.me/Qrbookbot?start=$i)\n"
                             }
                             else
                             {
@@ -1333,23 +1967,7 @@ class Bot : TelegramLongPollingBot()
                 }
                 "Онлайн Уроки"->
                 {
-                    val univer = users.get(user_id)
-                    var text = "*** Номер гр. -\tНазвание гр. \n***"
-                    var i=0
-                    var array = ArrayList<Int>()
-                    while (i < db.read_lesson(univer!![3])[0][3].toInt() )
-                    {
-                        array.add(i+1)
-                        text += "`\t\t\t\t\t\t\t${i+1} - ${db.read_lesson(univer[3])[i][1]}` \n"
-                        i++
-                    }
-                    univer_lesson.put(univer[3].toInt(),array)
-                    val text2 = "__Введите номер группы!__"
-                    sendMessage(user_id,text)
-                    sendMessage(user_id,text2 )
-                    users_pos.replace(user_id,23)
-                    db.update_position(user_id,23)
-                    btn_done(user_id)
+                    lessonButton(user_id)
 
                 }
                 "Поиск"->

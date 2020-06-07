@@ -1,5 +1,6 @@
 package elibbot
 
+import org.w3c.dom.Text
 import java.sql.Connection
 import java.sql.DriverManager
 import java.sql.Statement
@@ -21,11 +22,35 @@ open class DB {
                 .getConnection(connect, user, pass)
             println("Database opened successfully")
             stmt = c!!.createStatement()
-            val sql = "CREATE TABLE LESSONS" +
+            val sql = "CREATE TABLE  teacher" +
                     "(ID               SERIAL PRIMARY KEY,"   +
                     " Univer_id            INT    NOT NULL,"  +
-                    " NAME                 TEXT   NOT NULL,"  +
-                    " TEXT              VARCHAR   NOT NULL)"
+                    " NAME                 TEXT   NOT NULL)"
+            stmt!!.executeUpdate(sql)
+            stmt.close()
+            c.close()
+        } catch (e: Exception) {
+            System.err.println(e.javaClass.name + ": " + e.message)
+            exitProcess(0)
+        }
+
+        println("Table created successfully")
+    }
+    open fun CREATE1() {
+        var c: Connection? = null
+        var stmt: Statement? = null
+        try {
+            Class.forName("org.postgresql.Driver")
+            c = DriverManager
+                .getConnection(connect, user, pass)
+            println("Database created successfully")
+            stmt = c!!.createStatement()
+            val sql = "CREATE TABLE  FILE" +
+                    "(ID                   INT PRIMARY KEY,"   +
+                    " Univer_id            INT    NOT NULL,"  +
+                    " Teacher_id           INT       REFERENCES   teacher," +
+                    " File_name           TEXT NOT NULL," +
+                    " File_id             TEXT NOT NULL)"
             stmt!!.executeUpdate(sql)
             stmt.close()
             c.close()
@@ -69,6 +94,61 @@ open class DB {
         }
 
     }
+    open fun write_teacher(
+        univer_id: Int,
+        name: String) {
+        var c: Connection? = null
+        var stmt: Statement? = null
+        try {
+            Class.forName("org.postgresql.Driver")
+            c = DriverManager
+                .getConnection(connect, user, pass)
+            c!!.autoCommit = false
+
+
+            stmt = c.createStatement()
+            var sql: String = "INSERT INTO TEACHER (univer_id,name) VALUES ( '$univer_id','$name');"
+            stmt.executeUpdate(sql)
+
+            stmt.close()
+            c.commit()
+            c.close()
+        } catch (e: Exception) {
+            System.err.println(e.javaClass.name + ": " + e.message)
+            System.exit(0)
+        }
+
+    }
+
+    open fun write_file(
+        id: Int,
+        univer_id: Int,
+        teacher_id: Int,
+        file_name: String,
+        file_id: String) {
+        var c: Connection? = null
+        var stmt: Statement? = null
+        try {
+            Class.forName("org.postgresql.Driver")
+            c = DriverManager
+                .getConnection(connect, user, pass)
+            c!!.autoCommit = false
+
+
+            stmt = c.createStatement()
+            var sql: String = "INSERT INTO FILE (id, univer_id, teacher_id, file_name, file_id) VALUES ('$id','$univer_id','$teacher_id','$file_name','$file_id');"
+            stmt.executeUpdate(sql)
+
+            stmt.close()
+            c.commit()
+            c.close()
+        } catch (e: Exception) {
+            System.err.println(e.javaClass.name + ": " + e.message)
+            System.exit(0)
+        }
+
+    }
+
     open fun write_lesson( univer:Int, name: String,text: String) {
         var c: Connection? = null
         var stmt: Statement? = null
@@ -94,7 +174,7 @@ open class DB {
     }
 
 
-    open fun write_univer(name:String)
+    open fun write_univer(id:Int,name:String)
     {
         var c: Connection? = null
         var stmt: Statement? = null
@@ -106,7 +186,7 @@ open class DB {
 
 
             stmt = c.createStatement()
-            var sql: String = "INSERT INTO UNIVERSITIES (NAME ) VALUES ('$name');"
+            var sql: String = "INSERT INTO UNIVERSITIES (ID,NAME ) VALUES ('$id','$name');"
             stmt.executeUpdate(sql)
 
             stmt.close()
@@ -190,7 +270,7 @@ open class DB {
         println("Operation READ done successfully")
         return temp
     }
-    fun read1(i:Int): Int {
+    private fun read1(i:Int): Int {
         var c: Connection? = null
         var stmt: Statement? = null
         var test =i
@@ -202,6 +282,170 @@ open class DB {
 
             stmt = c.createStatement()
             val rs = stmt!!.executeQuery("SELECT * FROM UNIVERSITIES ORDER BY id;")
+            while (rs.next()) {
+                test++
+
+            }
+
+
+            rs.close()
+            stmt.close()
+            c.close()
+
+        } catch (e: Exception) {
+            System.err.println(e.javaClass.name + ": " + e.message)
+            //System.exit(0)
+        }
+        return test
+    }
+
+    open fun read_teacher(): Array<Array<String>> {
+        var c: Connection? = null
+        var stmt: Statement? = null
+        var i =0
+        var test2 =0
+        var test=read1_teacher(i)
+        if(test ==0)
+        {
+            test2 = 1
+        }
+        else {
+            test2 = test
+        }
+        var temp: Array<Array<String>> = Array(test2, { Array(4, {"0"}) })
+
+        try {
+            Class.forName("org.postgresql.Driver")
+            c = DriverManager
+                .getConnection(connect, user, pass)
+            c!!.autoCommit = false
+
+
+            stmt = c.run { createStatement() }
+            val rs = stmt!!.executeQuery("SELECT * FROM teacher ORDER BY id;")
+
+            var t = 0
+
+            while (rs.next()) {
+                val id = rs.getInt("id")
+                val name = rs.getString("name")
+                val univer_id = rs.getInt("univer_id")
+                temp[t][0] = id.toString()
+                temp[t][1] = univer_id.toString()
+                temp[t][2] = name
+                t++
+            }
+
+            rs.close()
+            stmt.close()
+            c.close()
+
+            temp[0][3]=test.toString()
+        } catch (e: Exception) {
+            System.err.println(e.javaClass.name + ": " + e.message)
+            //System.exit(0)
+        }
+
+        println("Operation READ done successfully")
+        return temp
+    }
+    private fun read1_teacher(i:Int): Int {
+        var c: Connection? = null
+        var stmt: Statement? = null
+        var test =i
+        try {
+            Class.forName("org.postgresql.Driver")
+            c = DriverManager
+                .getConnection(connect, user, pass)
+            c!!.autoCommit = false
+
+            stmt = c.createStatement()
+            val rs = stmt!!.executeQuery("SELECT * FROM teacher ORDER BY id;")
+            while (rs.next()) {
+                test++
+
+            }
+
+
+            rs.close()
+            stmt.close()
+            c.close()
+
+        } catch (e: Exception) {
+            System.err.println(e.javaClass.name + ": " + e.message)
+            //System.exit(0)
+        }
+        return test
+    }
+
+    open fun read_file(): Array<Array<String>> {
+        var c: Connection? = null
+        var stmt: Statement? = null
+        var i =0
+        var test2 =0
+        var test=read1_file(i)
+        if(test ==0)
+        {
+            test2 = 1
+        }
+        else {
+            test2 = test
+        }
+        var temp: Array<Array<String>> = Array(test2, { Array(6, {"0"}) })
+
+        try {
+            Class.forName("org.postgresql.Driver")
+            c = DriverManager
+                .getConnection(connect, user, pass)
+            c!!.autoCommit = false
+
+
+            stmt = c.run { createStatement() }
+            val rs = stmt!!.executeQuery("SELECT * FROM file ORDER BY id;")
+
+            var t = 0
+
+            while (rs.next()) {
+                val id = rs.getInt("id")
+                val univer_id = rs.getInt("univer_id")
+                val teacher_id = rs.getInt("teacher_id")
+                val name = rs.getString("file_name")
+                val file_id = rs.getString("file_id")
+
+                temp[t][0] = id.toString()
+                temp[t][1] = univer_id.toString()
+                temp[t][2] = teacher_id.toString()
+                temp[t][3] = name
+                temp[t][4] = file_id
+
+                t++
+            }
+
+            rs.close()
+            stmt.close()
+            c.close()
+
+            temp[0][5]=test.toString()
+        } catch (e: Exception) {
+            System.err.println(e.javaClass.name + ": " + e.message)
+            //System.exit(0)
+        }
+
+        println("Operation READ done successfully")
+        return temp
+    }
+    fun read1_file(i:Int): Int {
+        var c: Connection? = null
+        var stmt: Statement? = null
+        var test =i
+        try {
+            Class.forName("org.postgresql.Driver")
+            c = DriverManager
+                .getConnection(connect, user, pass)
+            c!!.autoCommit = false
+
+            stmt = c.createStatement()
+            val rs = stmt!!.executeQuery("SELECT * FROM file ORDER BY id;")
             while (rs.next()) {
                 test++
 
