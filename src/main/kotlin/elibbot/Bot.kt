@@ -56,7 +56,7 @@ class Bot : TelegramLongPollingBot()
         private var posting_photo = mutableMapOf<Long,String>()
         private var UniverRole = mutableMapOf<String,Int>()
         override fun getBotToken(): String {
-            return "995371026:AAFHcRpJRgESCGXVaVaFYwtTvG54-4gkAgk"
+            return "995371026:AAF0HqINUUv2pJppRmDRJl19hRCpY5faiFE"
         }
 
         override fun getBotUsername(): String {
@@ -117,7 +117,7 @@ class Bot : TelegramLongPollingBot()
                         var c = 0
                         while (c < teachers[0][3].toInt()) {
 //                            println("univ = $univ  techuniv = ${teachers[c][1]}")
-                            if (univ == teachers[c][1].toInt()) {
+                            if (teachers[c][1] == "0"){
                                 var array = ArrayList<String>()
 //                                println("SS2")
 
@@ -130,7 +130,7 @@ class Bot : TelegramLongPollingBot()
                             }
                             c++
                         }
-                        teacher.put(univ, arrays)
+                        teacher.put(0, arrays)
 //                        println("teach $teacher")
                     }
                     println(teacher_size)
@@ -419,44 +419,30 @@ class Bot : TelegramLongPollingBot()
                                buttongroup2(chat_id, message)
 
                            }
-                           30 -> {
-                               if(message != "Готово") {
-                                   if (univerlist.containsKey(message.toInt())) {
-                                       admin_univer_id.put(chat_id, message.toInt())
-                                       users_pos.replace(chat_id, 31)
-                                       db.update_position(chat_id, 31)
-                                       sendMessage(chat_id, "``` SEND TEACHER's NAME```")
-                                   } else {
-                                       sendMessage(chat_id, "``` Incorrect ID!Enter Again```")
-                                   }
-                               }
-                               buttongroup2(chat_id, message)
-
-                           }
+//                           30 -> {
+//                               if(message != "Готово") {
+//                                   if (univerlist.containsKey(message.toInt())) {
+//                                       admin_univer_id.put(chat_id, message.toInt())
+//                                       users_pos.replace(chat_id, 31)
+//                                       db.update_position(chat_id, 31)
+//                                       sendMessage(chat_id, "``` SEND TEACHER's NAME```")
+//                                   } else {
+//                                       sendMessage(chat_id, "``` Incorrect ID!Enter Again```")
+//                                   }
+//                               }
+//                               buttongroup2(chat_id, message)
+//
+//                           }
                            31 -> {
                                if(message != "Готово") {
-                                   var array = ArrayList<ArrayList<String>>()
-                                   var arr = ArrayList<String>()
+                                   val array = ArrayList<ArrayList<String>>()
+                                   val arr = ArrayList<String>()
                                    arr.add(teacher_size.size.toString())
                                    arr.add(message)
                                    array.add(arr)
-
-                                   val univer_id = admin_univer_id[chat_id]
-                                   arr.add(univer_id.toString())
                                    teacher_size.add(arr)
-                                   if (!teacher.containsKey(univer_id!!))
-                                   {
-                                       teacher.put(univer_id!!,array)
-                                       db.write_teacher(univer_id,message)
-                                   }
-                                   else{
-//                                       var arrays = ArrayList<ArrayList<String>>()
-                                       var arrays = teacher[univer_id]!!
-//                                       teacher_size.add(arr)
-                                       arrays.add(arr)
-                                       teacher.replace(univer_id,arrays)
-                                       db.write_teacher(univer_id,message)
-                                   }
+                                   teacher[0]!!.add(arr)
+                                   db.write_teacher(message)
                                    sendMessage(chat_id,"Added")
 
                                }
@@ -485,20 +471,12 @@ class Bot : TelegramLongPollingBot()
                            }
                            32->{
                                if(message != "Готово") {
-                                   if (univerlist.containsKey(message.toInt())) {
-                                       admin_univer_id.put(chat_id, message.toInt())
-
-//                                       sendMessage(chat_id,"```TEACHERS  ${teacher.get}```")
+//                                   if (univerlist.containsKey(message.toInt())) {
+//                                       admin_univer_id.put(chat_id, message.toInt())
+//
+////                                       sendMessage(chat_id,"```TEACHERS  ${teacher.get}```")
                                        if(teacher.containsKey(message.toInt()))
                                        {
-                                           var c = 1
-                                           var text = "TEACHERS\n"
-                                           for ( i in teacher[message.toInt()]!!)
-                                           {
-                                               text += "$c - ${i[1]}\n"
-                                               c++
-                                           }
-                                           sendMessage(chat_id,text)
                                            users_pos.replace(chat_id, 33)
                                            db.update_position(chat_id, 33)
                                        }
@@ -506,19 +484,16 @@ class Bot : TelegramLongPollingBot()
                                            sendMessage(chat_id,"NO TEACHERS")
                                            maintenance(chat_id)
                                        }
-
-                                       sendMessage(chat_id, "``` SEND TEACHER's ID```")
                                    } else {
                                        sendMessage(chat_id, "``` Incorrect ID!Enter Again```")
                                    }
-                               }
                                buttongroup2(chat_id, message)
                            }
                            33->{
                                if (message != "Готово")
                                {
-                                   val univer_id = admin_univer_id.get(chat_id)
-                                   var array = teacher[univer_id]!!
+//                                   val univer_id = admin_univer_id.get(chat_id)
+                                   var array = teacher[0]!!
                                    println(" size  =  ${array.size}")
                                    if (message.toInt() <= array.size )
                                    {
@@ -616,7 +591,7 @@ class Bot : TelegramLongPollingBot()
                        val univer = users[user_id]!![3]
                        val lesson = univer_lesson[univer.toInt()]
                        if (lesson != null) {
-                           var text = "*** Расписание группы - ${db.read_lesson(univer)[num.toInt()-1][1]} \n ***"
+                           var text = "*** Расписание - ${db.read_lesson(univer)[num.toInt()-1][1]} \n ***"
                            text += db.read_lesson(univer)[num.toInt()-1][2]
                            sendMessage(user_id,text)
                            lessons.clear()
@@ -713,32 +688,41 @@ class Bot : TelegramLongPollingBot()
                    else if (call_data.startsWith("t"))
                    {
                        val num = call_data.substring(1)
-                       val univer_id = users[user_id]!![3].toInt()
-                       var array = teacher[univer_id]!!
+                       val univer_id = 0
+                       val array = teacher[univer_id]!!
                        println(" size  =  ${array.size}")
-                       if (num.toInt() <= array.size )
-                       {
+                       if (num.toInt() <= array.size ) {
                            println("te  ${array[num.toInt() - 1]}")
-                           var arrays = addFile[array[num.toInt() - 1][0].toInt()]
+                           val arrays = addFile[array[num.toInt() - 1][0].toInt()]
                            println(arrays)
-                           var text  = "${array[num.toInt() - 1][1]}\n"
                            var i = 0
-                           if (arrays!!.size >=1){
-                               while (i < arrays.size)
-                               {
+                           if (arrays!!.size >= 1) {
+                               var count = 0
+                               val array1 = ArrayList<String>()
+                               while (i < arrays.size) {
                                    println("c = $arrays")
-                                  text += " ${i+1}.[${arrays[i][1]}](t.me/Qrbookbot?start=FILE${arrays[i][3]})\n"
+                                   count++
+//                                  text += " ${i+1}.[${arrays[i][1]}](t.me/Qrbookbot?start=FILE${arrays[i][3]})\n"
+                                   array1.add("$count.[${arrays[i][1]}](t.me/Qrbookbot?start=FILE${arrays[i][3]})\n")
                                    i++
+                               }
+                               var j = 0
+                               var b = 0
+                               while (b < array1.size) {
+                                   var text1 = "*** ${array[num.toInt() - 1][1]}\n ***"
+                                   j = b
+                                   while ((b - j < 50) and (b < array1.size)) {
+                                       text1 += array1[b]
+                                       b++
+                                   }
+
+                                   sendMessage(user_id, text1)
                                }
                            }
                            else
                            {
-                               text = "Пока нет файлов"
+                               sendMessage(user_id, "Пока нет файлов")
                            }
-
-
-//                           admin_add_file.put(user_id,array[num.toInt() - 1][0].toInt())
-                           sendMessage(user_id, text)
 
                        }
                    }
@@ -1025,9 +1009,9 @@ class Bot : TelegramLongPollingBot()
 
 
             }
-            val rowInline1 = ArrayList<InlineKeyboardButton>()
-            rowInline1.add(InlineKeyboardButton().setText("Учителя").setCallbackData("teach"))
-            rowsInline.add(listOf(rowInline1[0]))
+//            val rowInline1 = ArrayList<InlineKeyboardButton>()
+//            rowInline1.add(InlineKeyboardButton().setText("Учителя").setCallbackData("teach"))
+//            rowsInline.add(listOf(rowInline1[0]))
 
 
 
@@ -1092,9 +1076,10 @@ class Bot : TelegramLongPollingBot()
             var button_text9 = "Поиск"
             var button_text10 = "Reload"
             var button_text11 = "Add Lesson"
-            var button_text13 = "Add Teacher"
+            var button_text13 = "Add Genre"
             var button_text14 = "Add File"
             val button_text12 = "Онлайн Уроки"
+            val button_text16 = "Жанры"
             val replyKeyboardMarkup = ReplyKeyboardMarkup()
             val message = SendMessage()
                 .setChatId(user_id)
@@ -1121,7 +1106,6 @@ class Bot : TelegramLongPollingBot()
             keyboardSecondRow.add(KeyboardButton("$button_text3"))
             keyboardSecondRow.add(KeyboardButton("$button_text4"))
             keyboardSeventhRow.add(KeyboardButton("$button_text11"))
-            keyboardSeventhRow.add(KeyboardButton("$button_text12"))
             keyboardEighthRow.add(KeyboardButton("$button_text13"))
             keyboardEighthRow.add(KeyboardButton("$button_text14"))
             keyboardThirdRow.add(KeyboardButton("$button_text5"))
@@ -1131,6 +1115,7 @@ class Bot : TelegramLongPollingBot()
             keyboardFifthRow.add(KeyboardButton("$button_text8"))
             keyboardSixRow.add(KeyboardButton("$button_text9"))
             keyboardSixRow.add(KeyboardButton("$button_text12"))
+            keyboardSixRow.add(KeyboardButton("$button_text16"))
             keyboard.add(keyboardFirstRow)
             keyboard.add(keyboardSixRow)
 
@@ -1215,44 +1200,31 @@ class Bot : TelegramLongPollingBot()
                     {
                         if(j.contains(v))
                         {
-
                             count++
-//                            text2 += " $count.[${k[0]}](t.me/Qrbookbot?start=${i})\n"
                             array.add(" $count.[${k[0]}](t.me/Qrbookbot?start=${i})\n")
-//                            if(c == 40)
-//                            {
-//                                text += "$count книг\n"
-//                                text += text2
-//                                sendMessage(user_id, text)
-//                                text2.drop(text2.length-1)
-//                                text.drop(text.length-1)
-//                                c = 0
-//                            }
-//                            c++
                         }
                     }
                 }
             }
-//            var arr = array.size
-//            while (c < arr/40)
-//            {
-//                var i = 0
-//                var text2 = " "
-//                while ( i < 40)
-//                {
-//                   text2 += array[i]
-//                    i++
-//
-//                }
-//                while (i < 40)
-//                {
-//                    array.drop(i)
-//                }
-//
-//                text += text2
-//                sendMessage(user_id,text)
-//
-//            }
+
+            println("assa0")
+
+            for ((v,k) in addFile)
+            {
+                for(size in 0 until k.size step 1 )
+                {
+                    println(k[size][1])
+                    println(size)
+                    if(k[size][1].contains(message)){
+                        count++
+                        println("xx")
+                        array.add(" $count.[${k[size][1]}](t.me/Qrbookbot?start=FILE${k[size][3]})\n")
+                    }
+                    else{
+                        continue
+                    }
+                }
+            }
             text += " $count  книг\n"
             sendMessage(user_id,text)
             var j =0
@@ -1701,7 +1673,7 @@ class Bot : TelegramLongPollingBot()
 
                 println("size11 = $size")
                 files_size.put((size).toString(),arr)
-                db.write_file(size,univer.toInt(), teach_id,name,id)
+                db.write_file(size, teach_id,name,id)
             }
             else{
                 val array = ArrayList<ArrayList<String>>()
@@ -1716,7 +1688,7 @@ class Bot : TelegramLongPollingBot()
 
                 println("size11 = $size")
                 files_size.put((size).toString(),arr)
-                db.write_file(size,univer.toInt(), teach_id,name,id)
+                db.write_file(size, teach_id,name,id)
 
             }
         }
@@ -1818,34 +1790,29 @@ class Bot : TelegramLongPollingBot()
                     sendMessage(user_id,"` Enter Univer_id`")
 
                 }
-                "Add Teacher"->
+                "Add Genre"->
                 {
                     btn_done(user_id)
-                    users_pos.replace(user_id,30)
-                    db.update_position(user_id,30)
-                    var text = "    *Univer LIST*\n"
-
-                    for(a in univerlist.keys) {
-
-                        text += "``` ${univerlist.get(a)} - ${a}```\n"
-                    }
-                    sendMessage(user_id,text)
-                    sendMessage(user_id,"` Enter Univer_id`")
+                    users_pos.replace(user_id,31)
+                    db.update_position(user_id,31)
+                    sendMessage(user_id,"` SEND GENRE`s NAME`")
 
                 }
                 "Add File"->
                 {
                     btn_done(user_id)
-                    users_pos.replace(user_id,32)
-                    db.update_position(user_id,32)
-                    var text = "    *Univer LIST*\n"
+                        var c = 1
+                        var text = "GENREs\n"
+                        for ( v in teacher[0]!!)
+                        {
+                            text += "$c - ${v[1]}\n"
+                            c++
+                        }
+                        sendMessage(user_id,text)
+                        users_pos.replace(user_id, 33)
+                        db.update_position(user_id, 33)
 
-                    for(a in univerlist.keys) {
-
-                        text += "``` ${univerlist.get(a)} - ${a}```\n"
-                    }
-                    sendMessage(user_id,text)
-                    sendMessage(user_id,"` Enter Univer_id`")
+                        sendMessage(user_id, "``` SEND GENRE's ID```")
 
                 }
                 "Список книг"->{
@@ -1969,6 +1936,91 @@ class Bot : TelegramLongPollingBot()
                 {
                     lessonButton(user_id)
 
+                }
+                "Жанры"->{
+                    val univer = 0
+                    val size = teacher[univer.toInt()]!!.size
+                    var arrays = teacher[univer.toInt()]!!
+                    var markupInline = InlineKeyboardMarkup()
+                    val rowsInline = ArrayList<List<InlineKeyboardButton>>()
+                    val rowInline = ArrayList<InlineKeyboardButton>()
+//            var last = array.last()
+                    var a = 0
+                    var text = "*** Жанры\n ***"
+                    var c = 1
+                    var array = ArrayList<Int>()
+                    for ( i in teacher[univer.toInt()]!!)
+                    {
+                        array.add(c)
+                        text += "$c - ${i[1]}\n"
+                        c++
+                    }
+
+                    for (id in array) {
+//                           println("rowsize ${array.size}")
+//                           sendMessage(user_id,text)
+//                           users_pos.replace(user_id, 33)
+//                           db.update_position(user_id, 33)
+
+                        if (array.size - a >=5)
+                        {
+                            rowInline.add(InlineKeyboardButton().setText(id.toString()).setCallbackData("t$id"))
+                            println("rowsize ${rowInline.size}")
+                            println(rowInline.size.rem(5))
+                            if((rowInline.size - a).rem(5) == 0)
+                            {
+
+                                rowsInline.add(arrayListOf(rowInline[id - 5],rowInline[id - 4],rowInline[id - 3],rowInline[id - 2],rowInline[id-1]))
+                                a += 5
+                                println("rowsize ${rowInline.size}")
+                            }
+                        }
+                        else if (array.size - a <5)
+                        {
+                            println("rowsize ${rowInline.size}")
+                            rowInline.add(InlineKeyboardButton().setText(id.toString()).setCallbackData("t$id"))
+                            if(array.size - a == 4)
+                            {
+                                if((rowInline.size-a).rem(4) == 0)
+                                {
+                                    rowsInline.add(arrayListOf(rowInline[id - 4],rowInline[id - 3],rowInline[id - 2],rowInline[id-1]))
+                                    a += 4
+                                }
+                            }
+                            else if(array.size - a == 3)
+                            {
+                                if((rowInline.size-a).rem(3) == 0)
+                                {
+                                    rowsInline.add(arrayListOf(rowInline[id - 3],rowInline[id - 2],rowInline[id-1]))
+                                    a += 3
+                                }
+                            }
+                            else if(array.size - a == 2)
+                            {
+                                if((rowInline.size-a).rem(2) == 0)
+                                {
+                                    rowsInline.add(arrayListOf(rowInline[id - 2],rowInline[id-1]))
+                                    a +=2
+                                }
+                            }
+                            else if(array.size - a == 1)
+                            {
+                                rowsInline.add(listOf(rowInline[id-1]))
+                            }
+                        }
+                    }
+                    val message = SendMessage() // Create a message object object
+                        .setChatId(user_id)
+                        .setParseMode("Markdown")
+                        .setText(text)
+
+                    markupInline.keyboard = rowsInline
+                    message.replyMarkup = markupInline
+                    try {
+                        execute(message) // Sending our message object to user
+                    } catch (e: TelegramApiException) {
+                        e.printStackTrace()
+                    }
                 }
                 "Поиск"->
                 {

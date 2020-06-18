@@ -95,7 +95,6 @@ open class DB {
 
     }
     open fun write_teacher(
-        univer_id: Int,
         name: String) {
         var c: Connection? = null
         var stmt: Statement? = null
@@ -107,7 +106,7 @@ open class DB {
 
 
             stmt = c.createStatement()
-            var sql: String = "INSERT INTO TEACHER (univer_id,name) VALUES ( '$univer_id','$name');"
+            var sql: String = "INSERT INTO TEACHER (name) VALUES ('$name');"
             stmt.executeUpdate(sql)
 
             stmt.close()
@@ -122,7 +121,6 @@ open class DB {
 
     open fun write_file(
         id: Int,
-        univer_id: Int,
         teacher_id: Int,
         file_name: String,
         file_id: String) {
@@ -136,7 +134,7 @@ open class DB {
 
 
             stmt = c.createStatement()
-            var sql: String = "INSERT INTO FILE (id, univer_id, teacher_id, file_name, file_id) VALUES ('$id','$univer_id','$teacher_id','$file_name','$file_id');"
+            var sql: String = "INSERT INTO FILE (id, teacher_id, file_name, file_id) VALUES ('$id','$teacher_id','$file_name','$file_id');"
             stmt.executeUpdate(sql)
 
             stmt.close()
@@ -329,9 +327,8 @@ open class DB {
             while (rs.next()) {
                 val id = rs.getInt("id")
                 val name = rs.getString("name")
-                val univer_id = rs.getInt("univer_id")
                 temp[t][0] = id.toString()
-                temp[t][1] = univer_id.toString()
+                temp[t][1] = "0"
                 temp[t][2] = name
                 t++
             }
@@ -407,13 +404,12 @@ open class DB {
 
             while (rs.next()) {
                 val id = rs.getInt("id")
-                val univer_id = rs.getInt("univer_id")
                 val teacher_id = rs.getInt("teacher_id")
                 val name = rs.getString("file_name")
                 val file_id = rs.getString("file_id")
 
                 temp[t][0] = id.toString()
-                temp[t][1] = univer_id.toString()
+                temp[t][1] = "0"
                 temp[t][2] = teacher_id.toString()
                 temp[t][3] = name
                 temp[t][4] = file_id
