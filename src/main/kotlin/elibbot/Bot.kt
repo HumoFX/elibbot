@@ -56,7 +56,7 @@ class Bot : TelegramLongPollingBot()
         private var posting_photo = mutableMapOf<Long,String>()
         private var UniverRole = mutableMapOf<String,Int>()
         override fun getBotToken(): String {
-            return "995371026:AAF0HqINUUv2pJppRmDRJl19hRCpY5faiFE"
+            return "995371026:AAEKQNV2Xin97x0m-JLnJnutDN9VzJyNUbU"
         }
 
         override fun getBotUsername(): String {
